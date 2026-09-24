@@ -173,11 +173,31 @@ export default function DashboardPage() {
   const fetchStats = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await fetch("/api/stats");
+      const res = await fetch("/api/stats?dashboard=true");
       if (!res.ok) throw new Error("Failed to load stats");
-      const data: Stats = await res.json();
-      setStats(data);
-      setTargetDraft(String(data.weeklyTarget));
+      const data = await res.json();
+      
+      const mappedStats: Stats = {
+        totalCo2: data.stats.total_co2_kg,
+        weeklyCo2: data.stats.weekly_co2_kg,
+        weeklyTarget: data.stats.weekly_target_kg,
+        categoryBreakdown: data.stats.categories.map((c: any) => ({
+          category: c.type,
+          totalCo2: c.total_kg
+        })),
+        recentActivities: data.recent_activities.map((a: any) => ({
+          id: a.id,
+          type: a.type,
+          quantity: a.quantity,
+          unit: a.unit,
+          co2: a.co2_kg,
+          date: a.created_at,
+          outlier: a.outlier
+        }))
+      };
+      
+      setStats(mappedStats);
+      setTargetDraft(String(mappedStats.weeklyTarget));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error");
     } finally {
@@ -195,10 +215,10 @@ export default function DashboardPage() {
     if (isNaN(val) || val <= 0) return;
     try {
       setSavingTarget(true);
-      const res = await fetch("/api/stats", {
-        method: "PATCH",
+      const res = await fetch("/api/target", {
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ weeklyTarget: val }),
+        body: JSON.stringify({ target_kg: val }),
       });
       if (!res.ok) throw new Error("Save failed");
       setEditingTarget(false);

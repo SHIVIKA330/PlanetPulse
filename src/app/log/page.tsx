@@ -5,15 +5,15 @@ import { useState } from "react";
 /* ---------- Constants ---------- */
 
 const ACTIVITIES = [
-  { value: "car", label: "Car", icon: "🚗", unit: "km", factor: 0.21 },
-  { value: "bus", label: "Bus", icon: "🚌", unit: "km", factor: 0.089 },
-  { value: "flight", label: "Flight", icon: "✈️", unit: "km", factor: 0.255 },
+  { value: "car", label: "Car", icon: "🚗", unit: "km", factor: 0.20 },
+  { value: "bus", label: "Bus", icon: "🚌", unit: "km", factor: 0.08 },
+  { value: "flight", label: "Flight", icon: "✈️", unit: "km", factor: 0.25 },
   {
     value: "electricity",
     label: "Electricity",
     icon: "⚡",
     unit: "kWh",
-    factor: 0.475,
+    factor: 0.80,
   },
   {
     value: "veg_meal",
@@ -27,7 +27,7 @@ const ACTIVITIES = [
     label: "Non-Veg Meal",
     icon: "🍖",
     unit: "meals",
-    factor: 3.0,
+    factor: 2.0,
   },
 ] as const;
 

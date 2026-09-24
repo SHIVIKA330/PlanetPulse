@@ -62,14 +62,23 @@ export default function HistoryPage() {
       setLoading(true);
       setError(null);
       const params = new URLSearchParams();
-      if (category) params.set("category", category);
-      if (startDate) params.set("startDate", startDate);
-      if (endDate) params.set("endDate", endDate);
+      if (category) params.set("type", category);
+      if (startDate) params.set("start_date", startDate);
+      if (endDate) params.set("end_date", endDate);
       const qs = params.toString();
       const res = await fetch(`/api/activities${qs ? `?${qs}` : ""}`);
       if (!res.ok) throw new Error("Failed to load activities");
-      const data: Activity[] = await res.json();
-      setActivities(data);
+      const data = await res.json();
+      const mappedData: Activity[] = data.map((a: any) => ({
+        id: a.id,
+        type: a.type,
+        quantity: a.quantity,
+        unit: a.unit,
+        co2: a.co2_kg,
+        date: a.created_at,
+        outlier: a.outlier
+      }));
+      setActivities(mappedData);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error");
     } finally {
@@ -85,7 +94,7 @@ export default function HistoryPage() {
   async function handleDelete(id: string) {
     try {
       setDeleteInProgress(true);
-      const res = await fetch(`/api/activities?id=${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/activities/${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error("Delete failed");
       setDeletingId(null);
       await fetchActivities();
