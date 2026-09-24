@@ -45,8 +45,8 @@ const ACTIVITY_OPTIONS = [
   { value: "bus", label: "🚌 Bus", unit: "km" },
   { value: "flight", label: "✈️ Flight", unit: "km" },
   { value: "electricity", label: "⚡ Electricity", unit: "kWh" },
-  { value: "veg_meal", label: "🥗 Veg Meal", unit: "meals" },
-  { value: "non_veg_meal", label: "🍖 Non-Veg Meal", unit: "meals" },
+  { value: "veg_meal", label: "🥗 Veg Meal", unit: "meals / servings" },
+  { value: "non_veg_meal", label: "🍖 Non-Veg Meal", unit: "meals / servings" },
 ] as const;
 
 const CHART_COLORS = [
@@ -65,6 +65,9 @@ const CATEGORY_ICONS: Record<string, string> = {
   electricity: "⚡",
   veg_meal: "🥗",
   non_veg_meal: "🍖",
+  Transportation: "🚗",
+  Energy: "⚡",
+  Food: "🍽️",
 };
 
 function formatCo2(value: number): string {
@@ -228,14 +231,22 @@ export default function DashboardPage() {
       if (!res.ok) throw new Error("Failed to load stats");
       const data = await res.json();
       
+      const grouped: Record<string, number> = { Transportation: 0, Energy: 0, Food: 0 };
+      for (const c of data.stats.categories) {
+        if (['car', 'bus', 'flight'].includes(c.type)) grouped.Transportation += c.total_kg;
+        else if (['electricity'].includes(c.type)) grouped.Energy += c.total_kg;
+        else if (['veg_meal', 'non_veg_meal'].includes(c.type)) grouped.Food += c.total_kg;
+      }
+      const catArray = Object.entries(grouped)
+        .filter(([_, val]) => val > 0)
+        .map(([name, val]) => ({ category: name, totalCo2: val }))
+        .sort((a, b) => b.totalCo2 - a.totalCo2);
+
       const mappedStats: Stats = {
         totalCo2: data.stats.total_co2_kg,
         weeklyCo2: data.stats.weekly_co2_kg,
         weeklyTarget: data.stats.weekly_target_kg,
-        categoryBreakdown: data.stats.categories.map((c: any) => ({
-          category: c.type,
-          totalCo2: c.total_kg
-        })),
+        categoryBreakdown: catArray,
         recentActivities: data.recent_activities.map((a: any) => ({
           id: a.id,
           type: a.type,
@@ -250,10 +261,7 @@ export default function DashboardPage() {
       };
 
       if (mappedStats.categoryBreakdown.length > 0) {
-        // categoryBreakdown is already sorted descending by the backend
-        const largest = mappedStats.categoryBreakdown[0];
-        const lbl = ACTIVITY_OPTIONS.find((o) => o.value === largest.category)?.label;
-        if (lbl) mappedStats.largestContributor = lbl.replace(/[^\w\s-]/g, '').trim();
+        mappedStats.largestContributor = mappedStats.categoryBreakdown[0].category;
       }
       
       setStats(mappedStats);

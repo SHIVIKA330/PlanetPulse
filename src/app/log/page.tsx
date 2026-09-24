@@ -19,14 +19,14 @@ const ACTIVITIES = [
     value: "veg_meal",
     label: "Veg Meal",
     icon: "🥗",
-    unit: "meals",
+    unit: "meals / servings",
     factor: 0.5,
   },
   {
     value: "non_veg_meal",
     label: "Non-Veg Meal",
     icon: "🍖",
-    unit: "meals",
+    unit: "meals / servings",
     factor: 2.0,
   },
 ] as const;
@@ -158,10 +158,10 @@ export default function LogPage() {
             className="block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-2"
           >
             {activity.value === 'car' || activity.value === 'bus' || activity.value === 'flight' 
-              ? 'Distance (km)' 
+              ? 'Quantity (km)' 
               : activity.value === 'electricity' 
-              ? 'Energy (kWh)' 
-              : 'Number of meals'}
+              ? 'Quantity (kWh)' 
+              : 'Quantity (meals / servings)'}
           </label>
           <div className="flex items-center gap-3">
             <input
