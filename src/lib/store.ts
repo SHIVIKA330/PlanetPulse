@@ -28,6 +28,8 @@ export interface Stats {
   exceeded: boolean;
   categories: CategoryStat[];
   activity_count: number;
+  week_start: string;
+  week_end: string;
 }
 
 export interface DashboardData {
@@ -201,15 +203,24 @@ export function getWeeklyTarget(): WeeklyTarget {
 export function getStats(): Stats {
   const allTimeTotal = activities.reduce((sum, a) => sum + a.co2_kg, 0);
 
-  // Rolling 7-day window
+  // Strict Monday -> Sunday calendar week (DP3)
   const now = new Date();
-  const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-  const weekActivities = getActivitiesInWindow(sevenDaysAgo, now);
+  const day = now.getDay();
+  const diff = now.getDate() - day + (day === 0 ? -6 : 1); // adjust when day is sunday
+  const weekStart = new Date(now);
+  weekStart.setDate(diff);
+  weekStart.setHours(0, 0, 0, 0);
+  
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekStart.getDate() + 6);
+  weekEnd.setHours(23, 59, 59, 999);
+
+  const weekActivities = getActivitiesInWindow(weekStart, weekEnd);
   const weeklyTotal = weekActivities.reduce((sum, a) => sum + a.co2_kg, 0);
 
-  // Per-category breakdown (all time)
+  // Per-category breakdown (for the current week, as requested by dashboard)
   const categoryMap = new Map<Activity['type'], { total_kg: number; count: number }>();
-  for (const a of activities) {
+  for (const a of weekActivities) {
     const existing = categoryMap.get(a.type) ?? { total_kg: 0, count: 0 };
     existing.total_kg += a.co2_kg;
     existing.count += 1;
@@ -223,8 +234,8 @@ export function getStats(): Stats {
       label: EMISSION_FACTORS[type].label,
       total_kg: Math.round(data.total_kg * 1000) / 1000,
       count: data.count,
-      percentage: allTimeTotal > 0
-        ? Math.round((data.total_kg / allTimeTotal) * 10000) / 100
+      percentage: weeklyTotal > 0
+        ? Math.round((data.total_kg / weeklyTotal) * 10000) / 100
         : 0,
     });
   }
@@ -239,6 +250,8 @@ export function getStats(): Stats {
     exceeded: weeklyTotal > weeklyTarget.target_kg,
     categories,
     activity_count: activities.length,
+    week_start: weekStart.toISOString(),
+    week_end: weekEnd.toISOString(),
   };
 }
 

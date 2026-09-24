@@ -33,6 +33,9 @@ interface Stats {
   weeklyTarget: number;
   categoryBreakdown: CategoryBreakdown[];
   recentActivities: RecentActivity[];
+  weekStart?: string;
+  weekEnd?: string;
+  largestContributor?: string;
 }
 
 /* ---------- Helpers ---------- */
@@ -70,6 +73,14 @@ function formatCo2(value: number): string {
     : `${value.toFixed(1)} kg`;
 }
 
+function formatDateRange(startIso?: string, endIso?: string) {
+  if (!startIso || !endIso) return "";
+  const opts: Intl.DateTimeFormatOptions = { weekday: 'short', month: 'short', day: 'numeric' };
+  const s = new Date(startIso).toLocaleDateString(undefined, opts);
+  const e = new Date(endIso).toLocaleDateString(undefined, opts);
+  return `${s} – ${e}`;
+}
+
 function getUnitForType(type: string): string {
   return ACTIVITY_OPTIONS.find((o) => o.value === type)?.unit ?? "";
 }
@@ -96,9 +107,11 @@ function StatCard({
 function BudgetBar({
   current,
   target,
+  largestContributor,
 }: {
   current: number;
   target: number;
+  largestContributor?: string;
 }) {
   const pct = target > 0 ? (current / target) * 100 : 0;
   const clamped = Math.min(pct, 100);
@@ -122,7 +135,7 @@ function BudgetBar({
 
       <div className="flex items-center justify-between text-sm">
         <span className="text-[var(--text-muted)]">
-          {formatCo2(current)} / {formatCo2(target)}
+          {formatCo2(current)} / {formatCo2(target)} ({Math.round(pct)}%)
         </span>
         <span className="font-medium">
           {exceeded
@@ -131,7 +144,7 @@ function BudgetBar({
         </span>
       </div>
 
-      {/* DP1 – Restorative Mode Nudge */}
+      {/* DP1 – The Nudge */}
       {exceeded && (
         <div className="rounded-xl bg-amber-50 border border-amber-200 p-4 flex items-start gap-3">
           <span className="text-2xl shrink-0" aria-hidden="true">
@@ -139,11 +152,12 @@ function BudgetBar({
           </span>
           <div>
             <p className="font-semibold text-amber-800">
-              You&apos;ve exceeded your target by {formatCo2(overAmount)}
+              Weekly target exceeded
             </p>
             <p className="text-sm text-amber-700 mt-1">
-              Swapping 2 non-veg meals to veg absorbs ~3.0&nbsp;kg CO₂e. Small
-              changes add up!
+              You&apos;ve recorded {formatCo2(current)} against your {formatCo2(target)} target.
+              You are {formatCo2(overAmount)} above your target.
+              {largestContributor && ` Your largest contributing category this week is ${largestContributor}.`}
             </p>
           </div>
         </div>
@@ -193,8 +207,17 @@ export default function DashboardPage() {
           co2: a.co2_kg,
           date: a.created_at,
           outlier: a.outlier
-        }))
+        })),
+        weekStart: data.stats.week_start,
+        weekEnd: data.stats.week_end,
       };
+
+      if (mappedStats.categoryBreakdown.length > 0) {
+        // categoryBreakdown is already sorted descending by the backend
+        const largest = mappedStats.categoryBreakdown[0];
+        const lbl = ACTIVITY_OPTIONS.find((o) => o.value === largest.category)?.label;
+        if (lbl) mappedStats.largestContributor = lbl.replace(/[^\w\s-]/g, '').trim();
+      }
       
       setStats(mappedStats);
       setTargetDraft(String(mappedStats.weeklyTarget));
@@ -392,11 +415,16 @@ export default function DashboardPage() {
 
       {/* ---------- Weekly Budget Gauge ---------- */}
       <section aria-label="Weekly budget progress">
-        <h2 className="text-sm font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-3">
-          Weekly Budget
-        </h2>
+        <div className="flex justify-between items-baseline mb-3">
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+            Weekly Budget
+          </h2>
+          <span className="text-sm text-[var(--text-muted)] font-medium">
+            {formatDateRange(stats.weekStart, stats.weekEnd)}
+          </span>
+        </div>
         <div className="rounded-2xl bg-white p-5 shadow-sm border border-[var(--border)]">
-          <BudgetBar current={stats.weeklyCo2} target={stats.weeklyTarget} />
+          <BudgetBar current={stats.weeklyCo2} target={stats.weeklyTarget} largestContributor={stats.largestContributor} />
         </div>
       </section>
 

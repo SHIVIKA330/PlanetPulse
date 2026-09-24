@@ -157,7 +157,11 @@ export default function LogPage() {
             htmlFor="quantity"
             className="block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-2"
           >
-            Quantity ({activity.unit})
+            {activity.value === 'car' || activity.value === 'bus' || activity.value === 'flight' 
+              ? 'Distance (km)' 
+              : activity.value === 'electricity' 
+              ? 'Energy (kWh)' 
+              : 'Number of meals'}
           </label>
           <div className="flex items-center gap-3">
             <input
@@ -199,11 +203,10 @@ export default function LogPage() {
         {showAbsurdConfirm && (
           <div className="rounded-xl bg-amber-50 border border-amber-300 p-4 space-y-3">
             <p className="text-amber-800 font-semibold">
-              🤔 That&apos;s a very long trip!
+              ⚠️ That quantity appears unusually high.
             </p>
             <p className="text-sm text-amber-700">
-              Did you mean <strong>{qty}</strong> {activity.unit}, or is this a
-              batch / fleet entry?
+              Please check the value before logging this activity. Is <strong>{qty}</strong> {activity.unit} correct?
             </p>
             <div className="flex gap-3">
               <button
@@ -212,14 +215,14 @@ export default function LogPage() {
                 disabled={submitting}
                 className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700 disabled:opacity-50 transition-colors"
               >
-                {submitting ? "Logging…" : "Confirm (tag as outlier)"}
+                {submitting ? "Logging…" : "Yes, log it anyway"}
               </button>
               <button
                 type="button"
                 onClick={() => setShowAbsurdConfirm(false)}
                 className="rounded-lg border border-amber-300 px-4 py-2 text-sm font-medium text-amber-800 hover:bg-amber-100 transition-colors"
               >
-                Edit
+                Edit value
               </button>
             </div>
           </div>

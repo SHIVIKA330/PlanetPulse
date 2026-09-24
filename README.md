@@ -63,6 +63,22 @@ Set a weekly CO₂ target; the app shows progress via a visual gauge and flags w
 ### 5. History & Filter
 All logged activities, filterable by type and date range.
 
+## ⚖️ Decision Point Summary
+
+- **DP1 — The Nudge:** Uses a supportive, non-punitive "Target Exceeded" feedback UI that identifies the largest contributing category.
+- **DP2 — Absurd Input:** Implements a two-tier check that pauses submission and requests explicit verification before logging unusual outliers.
+- **DP3 — The Week:** Strict Monday → Sunday calendar week computation for intuitive tracking and target-setting.
+*See [DECISIONS.md](./DECISIONS.md) for full context.*
+
+## 🧪 Tests Performed
+
+The following test scenarios were manually validated:
+- Base factors test (10km Car = 2.00kg, 10kWh Electricity = 8.00kg, etc.)
+- Exceeded target limits (Shows correct overage amount and largest contributor)
+- Absurd Input (500,000 km car warns user correctly)
+- History filtering (By type and date range combined)
+- Calendar week accuracy (Activities outside the current Mon-Sun period do not affect the weekly target metric)
+
 ## 🔌 Standard API
 
 This project implements the standard REST API:
