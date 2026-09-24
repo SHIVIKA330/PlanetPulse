@@ -32,38 +32,76 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <header className="sticky top-0 z-50 border-b bg-white/90 backdrop-blur-sm border-[var(--border)]">
-          <nav className="max-w-5xl mx-auto w-full px-4 h-14 flex items-center justify-between">
+        <header className="sticky top-0 z-50 bg-[var(--bg-cream)]">
+          <nav className="max-w-6xl mx-auto w-full px-6 h-20 flex items-center justify-between">
             {/* Logo */}
             <Link
               href="/"
-              className="flex items-center gap-1.5 text-lg font-bold text-[var(--accent-dark)] select-none"
+              className="flex items-center gap-2 text-2xl font-black text-[var(--forest-dark)] select-none tracking-tight"
             >
-              <span className="text-xl" aria-hidden="true">
-                🌿
+              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--lime)] text-white text-xl shadow-sm" aria-hidden="true">
+                🍃
               </span>
               PlanetPulse
             </Link>
 
             {/* Nav links */}
-            <ul className="flex items-center gap-1 sm:gap-2">
+            <ul className="flex items-center gap-6">
               {navLinks.map((link) => (
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="rounded-lg px-3 py-1.5 text-sm font-medium text-[var(--text-muted)] transition-colors hover:text-[var(--accent-dark)] hover:bg-[var(--accent-light)]/50"
+                    className="text-[15px] font-bold text-[var(--forest)] transition-colors hover:text-[var(--lime)]"
                   >
                     {link.label}
                   </Link>
                 </li>
               ))}
+              <li>
+                <Link href="/log" className="ml-2 rounded-full bg-[var(--lime)] px-6 py-2.5 text-[15px] font-bold text-white transition-colors hover:bg-[var(--lime-hover)] shadow-sm">
+                  Log Now
+                </Link>
+              </li>
             </ul>
           </nav>
         </header>
 
-        <main className="flex-1 max-w-5xl mx-auto w-full px-4 py-8">
+        <main className="flex-1 max-w-6xl mx-auto w-full px-6 py-10">
           {children}
         </main>
+        
+        <footer className="bg-[var(--forest)] py-12 mt-auto">
+          <div className="max-w-6xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-8 text-[var(--bg-cream)]">
+            <div>
+              <div className="flex items-center gap-2 text-2xl font-black select-none tracking-tight mb-4">
+                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--lime)] text-white text-xl">
+                  🍃
+                </span>
+                PlanetPulse
+              </div>
+              <p className="text-sm opacity-80 leading-relaxed max-w-xs">
+                Track your daily carbon footprint, set weekly targets, and make sustainable choices visible.
+              </p>
+            </div>
+            <div>
+              <h3 className="font-bold text-lg mb-4 text-[var(--lime)]">Quick Links</h3>
+              <ul className="space-y-2 opacity-90 text-sm">
+                <li><Link href="/">Dashboard</Link></li>
+                <li><Link href="/history">History</Link></li>
+                <li><Link href="/log">Log Activity</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-bold text-lg mb-4 text-[var(--lime)]">Impact</h3>
+              <p className="text-sm opacity-80 leading-relaxed max-w-xs">
+                Every sustainable choice makes a difference. Start tracking today for a greener tomorrow.
+              </p>
+            </div>
+          </div>
+          <div className="max-w-6xl mx-auto px-6 mt-12 pt-8 border-t border-white/10 text-center text-xs opacity-60">
+            &copy; {new Date().getFullYear()} PlanetPulse. All Rights Reserved.
+          </div>
+        </footer>
       </body>
     </html>
   );

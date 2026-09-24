@@ -93,16 +93,30 @@ function getUnitForType(type: string): string {
 function StatCard({
   label,
   children,
+  variant = "cream",
 }: {
   label: string;
   children: React.ReactNode;
+  variant?: "cream" | "forest";
 }) {
+  const isForest = variant === "forest";
   return (
-    <section className="rounded-2xl bg-white p-5 shadow-sm border border-[var(--border)] flex flex-col gap-1">
-      <span className="text-xs font-medium uppercase tracking-wider text-[var(--text-muted)]">
+    <section className={`rounded-[32px] p-8 shadow-sm flex flex-col gap-2 relative overflow-hidden transition-all ${
+      isForest 
+        ? "bg-[var(--forest-dark)] text-white" 
+        : "bg-[var(--bg-cream)] text-[var(--text-main)]"
+    }`}>
+      {/* Decorative top-left icon circle for flavor */}
+      <div className={`absolute -top-4 -left-4 w-20 h-20 rounded-full opacity-20 pointer-events-none ${isForest ? "bg-white" : "bg-[var(--lime)]"}`} />
+      
+      <span className={`text-sm font-bold uppercase tracking-wider relative z-10 ${
+        isForest ? "text-white/80" : "text-[var(--text-muted)]"
+      }`}>
         {label}
       </span>
-      {children}
+      <div className="relative z-10">
+        {children}
+      </div>
     </section>
   );
 }
@@ -349,109 +363,105 @@ export default function DashboardPage() {
     <div className="space-y-8">
       {/* ---------- Hero Stats ---------- */}
       <section aria-label="Key metrics">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {/* Total CO₂ */}
-          <StatCard label="Total CO₂ (all time)">
-            <p className="text-3xl font-bold text-[var(--accent-dark)]">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Total */}
+          <StatCard label="Total CO₂ (all time)" variant="cream">
+            <p className="text-4xl font-black text-[var(--forest-dark)] mt-2 tracking-tight">
               {formatCo2(stats.totalCo2)}
             </p>
-            <span className="text-xs text-[var(--text-muted)]">CO₂e</span>
+            <span className="text-sm font-medium text-[var(--text-muted)] mt-1 inline-block">CO₂e</span>
           </StatCard>
 
           {/* This week */}
-          <StatCard label="This week">
-            <p className="text-3xl font-bold text-[var(--accent)]">
+          <StatCard label="This week" variant="forest">
+            <p className="text-4xl font-black text-white mt-2 tracking-tight">
               {formatCo2(stats.weeklyCo2)}
             </p>
-            <div className="mt-2">
+            <div className="mt-4 flex items-center justify-between">
               {/* Circular gauge */}
-              <svg
-                viewBox="0 0 36 36"
-                className="w-14 h-14"
-                aria-label={`${Math.round(
-                  (stats.weeklyCo2 / stats.weeklyTarget) * 100
-                )}% of weekly target`}
-              >
-                <path
-                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                  fill="none"
-                  stroke="#E5E7EB"
-                  strokeWidth="3"
-                />
-                <path
-                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                  fill="none"
-                  stroke={
-                    stats.weeklyCo2 / stats.weeklyTarget >= 1
-                      ? "#EF4444"
-                      : stats.weeklyCo2 / stats.weeklyTarget >= 0.7
-                      ? "#F59E0B"
-                      : "#059669"
-                  }
-                  strokeWidth="3"
-                  strokeDasharray={`${Math.min(
-                    (stats.weeklyCo2 / stats.weeklyTarget) * 100,
-                    100
-                  )}, 100`}
-                  strokeLinecap="round"
-                />
-                <text
-                  x="18"
-                  y="20.35"
-                  className="fill-[var(--text)]"
-                  fontSize="8"
-                  textAnchor="middle"
-                  fontWeight="bold"
+              <div className="relative">
+                <svg
+                  viewBox="0 0 36 36"
+                  className="w-16 h-16 drop-shadow-md"
+                  aria-label={`${Math.round(
+                    (stats.weeklyCo2 / stats.weeklyTarget) * 100
+                  )}% of weekly target`}
                 >
+                  <path
+                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                    fill="none"
+                    stroke="rgba(255,255,255,0.2)"
+                    strokeWidth="4"
+                  />
+                  <path
+                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                    fill="none"
+                    stroke="var(--lime)"
+                    strokeWidth="4"
+                    strokeDasharray={`${Math.min(
+                      (stats.weeklyCo2 / stats.weeklyTarget) * 100,
+                      100
+                    )}, 100`}
+                    className="transition-all duration-1000 ease-out"
+                    strokeLinecap="round"
+                  />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center font-bold text-xs text-white">
                   {Math.round((stats.weeklyCo2 / stats.weeklyTarget) * 100)}%
-                </text>
-              </svg>
+                </div>
+              </div>
             </div>
           </StatCard>
 
           {/* Weekly target */}
-          <StatCard label="Weekly Target">
+          <StatCard label="Weekly Target" variant="cream">
             {editingTarget ? (
-              <div className="flex items-center gap-2 mt-1">
-                <input
-                  type="number"
-                  min={1}
-                  step="any"
-                  value={targetDraft}
-                  onChange={(e) => setTargetDraft(e.target.value)}
-                  className="w-24 rounded-lg border border-[var(--border)] px-2 py-1 text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-400"
-                  aria-label="Weekly target in kg CO₂e"
-                />
-                <span className="text-sm text-[var(--text-muted)]">kg</span>
-                <button
-                  onClick={handleSaveTarget}
-                  disabled={savingTarget}
-                  className="rounded-lg bg-emerald-600 px-3 py-1 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50 transition-colors"
-                >
-                  {savingTarget ? "…" : "Save"}
-                </button>
-                <button
-                  onClick={() => {
-                    setEditingTarget(false);
-                    setTargetDraft(String(stats.weeklyTarget));
-                  }}
-                  className="text-sm text-[var(--text-muted)] hover:text-[var(--text)]"
-                >
-                  Cancel
-                </button>
+              <div className="flex flex-col gap-3 mt-2">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    min={1}
+                    step="any"
+                    value={targetDraft}
+                    onChange={(e) => setTargetDraft(e.target.value)}
+                    className="w-24 rounded-xl border border-[var(--border-soft)] bg-white px-3 py-2 text-lg font-bold text-[var(--forest-dark)] focus:outline-none focus:ring-2 focus:ring-[var(--lime)]"
+                    aria-label="Weekly target in kg CO₂e"
+                  />
+                  <span className="text-sm font-medium text-[var(--text-muted)]">kg</span>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleSaveTarget}
+                    disabled={savingTarget}
+                    className="flex-1 rounded-full bg-[var(--lime)] px-3 py-1.5 text-sm font-bold text-white hover:bg-[var(--lime-hover)] disabled:opacity-50 transition-colors shadow-sm"
+                  >
+                    {savingTarget ? "…" : "Save"}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setEditingTarget(false);
+                      setTargetDraft(String(stats.weeklyTarget));
+                    }}
+                    className="flex-1 rounded-full bg-white px-3 py-1.5 text-sm font-bold text-[var(--text-muted)] hover:text-[var(--forest)] hover:bg-gray-50 border border-[var(--border-soft)] transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
               </div>
             ) : (
-              <div className="flex items-baseline gap-2">
-                <p className="text-3xl font-bold text-[var(--text)]">
+              <div className="mt-2">
+                <p className="text-4xl font-black text-[var(--forest-dark)] tracking-tight">
                   {formatCo2(stats.weeklyTarget)}
                 </p>
-                <button
-                  onClick={() => setEditingTarget(true)}
-                  className="text-xs text-emerald-600 hover:text-emerald-800 font-medium transition-colors"
-                  aria-label="Edit weekly target"
-                >
-                  ✏️ Edit
-                </button>
+                <div className="flex items-center justify-between mt-3">
+                  <span className="text-sm font-medium text-[var(--text-muted)]">kg CO₂e</span>
+                  <button
+                    onClick={() => setEditingTarget(true)}
+                    className="rounded-full bg-white border border-[var(--border-soft)] px-4 py-1.5 text-sm font-bold text-[var(--forest)] hover:bg-[var(--lime)] hover:text-white hover:border-[var(--lime)] transition-colors shadow-sm"
+                  >
+                    ✏️ Edit
+                  </button>
+                </div>
               </div>
             )}
           </StatCard>
@@ -459,26 +469,26 @@ export default function DashboardPage() {
       </section>
 
       {/* ---------- Weekly Budget Gauge ---------- */}
-      <section aria-label="Weekly budget progress">
-        <div className="flex justify-between items-baseline mb-3">
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+      <section aria-label="Weekly budget progress" className="mt-12">
+        <div className="flex justify-between items-baseline mb-4 px-2">
+          <h2 className="text-lg font-bold text-[var(--forest-dark)] tracking-tight">
             Weekly Budget
           </h2>
-          <span className="text-sm text-[var(--text-muted)] font-medium">
+          <span className="text-sm text-[var(--text-muted)] font-medium bg-[var(--bg-cream)] px-3 py-1 rounded-full">
             {formatDateRange(stats.weekStart, stats.weekEnd)}
           </span>
         </div>
-        <div className="rounded-2xl bg-white p-5 shadow-sm border border-[var(--border)]">
+        <div className="rounded-[32px] bg-[var(--bg-cream)] p-8 shadow-sm">
           <BudgetBar current={stats.weeklyCo2} target={stats.weeklyTarget} largestContributor={stats.largestContributor} weekStart={stats.weekStart} />
         </div>
       </section>
 
       {/* ---------- Category Breakdown ---------- */}
-      <section aria-label="Category breakdown">
-        <h2 className="text-sm font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-3">
+      <section aria-label="Category breakdown" className="mt-12">
+        <h2 className="text-lg font-bold text-[var(--forest-dark)] mb-4 px-2 tracking-tight">
           CO₂ by Category
         </h2>
-        <div className="rounded-2xl bg-white p-5 shadow-sm border border-[var(--border)]">
+        <div className="rounded-[32px] bg-white p-8 shadow-sm border border-[var(--border-soft)]">
           {stats.categoryBreakdown.length === 0 ? (
             <p className="text-center text-[var(--text-muted)] py-8">
               No activities logged this week. Start by recording your first activity.
@@ -518,9 +528,9 @@ export default function DashboardPage() {
 
               <div className="w-full md:w-2/3 flex flex-col gap-4">
                 {stats.largestContributor && stats.weeklyCo2 > 0 && (
-                  <div className="rounded-xl bg-blue-50 border border-blue-200 p-4">
-                    <p className="text-sm text-blue-800">
-                      <span className="font-bold text-lg block mb-1">💡 Insight</span>
+                  <div className="rounded-2xl bg-[#E8F3E5] border border-[#C5DFB3] p-5">
+                    <p className="text-sm text-[var(--forest-dark)]">
+                      <span className="font-black text-lg block mb-1">💡 Insight</span>
                       {stats.largestContributor} is{" "}
                       <strong>{Math.round((stats.categoryBreakdown[0].totalCo2 / stats.weeklyCo2) * 100)}%</strong> of your footprint this week.
                     </p>
@@ -530,22 +540,22 @@ export default function DashboardPage() {
                   {stats.categoryBreakdown.map((cat, idx) => (
                     <li
                       key={cat.category}
-                      className="flex items-center justify-between rounded-lg px-3 py-2 hover:bg-gray-50 transition-colors"
+                      className="flex items-center justify-between rounded-xl px-4 py-3 hover:bg-[var(--bg-cream)] transition-colors"
                     >
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-3">
                         <span
-                          className="inline-block w-3 h-3 rounded-full"
+                          className="inline-block w-4 h-4 rounded-full shadow-sm"
                           style={{
                           backgroundColor:
                             CHART_COLORS[idx % CHART_COLORS.length],
                         }}
                       />
-                      <span className="text-sm capitalize">
+                      <span className="text-sm font-bold text-[var(--forest-dark)]">
                         {CATEGORY_ICONS[cat.category] ?? "📦"}{" "}
                         {cat.category.replace("_", " ")}
                       </span>
                     </div>
-                    <span className="text-sm font-semibold">
+                    <span className="text-sm font-black text-[var(--forest-dark)]">
                       {formatCo2(cat.totalCo2)}
                     </span>
                   </li>
@@ -558,18 +568,18 @@ export default function DashboardPage() {
       </section>
 
       {/* ---------- Quick Log ---------- */}
-      <section aria-label="Quick log">
-        <h2 className="text-sm font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-3">
+      <section aria-label="Quick log" className="mt-12">
+        <h2 className="text-lg font-bold text-[var(--forest-dark)] mb-4 px-2 tracking-tight">
           Quick Log
         </h2>
         <form
           onSubmit={handleQuickLog}
-          className="rounded-2xl bg-white p-5 shadow-sm border border-[var(--border)] flex flex-col sm:flex-row items-end gap-3"
+          className="rounded-[32px] bg-[var(--bg-cream)] p-8 shadow-sm flex flex-col sm:flex-row items-end gap-4"
         >
           <div className="flex-1 w-full">
             <label
               htmlFor="ql-type"
-              className="block text-xs font-medium text-[var(--text-muted)] mb-1"
+              className="block text-xs font-bold text-[var(--text-muted)] mb-2 uppercase tracking-wider"
             >
               Activity
             </label>
@@ -577,7 +587,7 @@ export default function DashboardPage() {
               id="ql-type"
               value={qlType}
               onChange={(e) => setQlType(e.target.value)}
-              className="w-full rounded-lg border border-[var(--border)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
+              className="w-full rounded-full border border-[var(--border-soft)] bg-white px-5 py-3 text-[15px] font-medium focus:outline-none focus:ring-2 focus:ring-[var(--lime)] shadow-sm"
             >
               {ACTIVITY_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -587,10 +597,10 @@ export default function DashboardPage() {
             </select>
           </div>
 
-          <div className="w-full sm:w-40">
+          <div className="w-full sm:w-48">
             <label
               htmlFor="ql-qty"
-              className="block text-xs font-medium text-[var(--text-muted)] mb-1"
+              className="block text-xs font-bold text-[var(--text-muted)] mb-2 uppercase tracking-wider"
             >
               Quantity ({getUnitForType(qlType)})
             </label>
@@ -603,20 +613,20 @@ export default function DashboardPage() {
               value={qlQty}
               onChange={(e) => setQlQty(e.target.value)}
               placeholder="e.g. 15"
-              className="w-full rounded-lg border border-[var(--border)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
+              className="w-full rounded-full border border-[var(--border-soft)] bg-white px-5 py-3 text-[15px] font-medium focus:outline-none focus:ring-2 focus:ring-[var(--lime)] shadow-sm"
             />
           </div>
 
           <button
             type="submit"
             disabled={qlSubmitting}
-            className="rounded-lg bg-emerald-600 px-5 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50 transition-colors whitespace-nowrap"
+            className="rounded-full bg-[var(--lime)] px-8 py-3 text-[15px] font-bold text-white hover:bg-[var(--lime-hover)] disabled:opacity-50 transition-colors whitespace-nowrap shadow-sm"
           >
             {qlSubmitting ? "Logging…" : "Log Activity"}
           </button>
 
           {qlSuccess && (
-            <span className="text-emerald-600 text-sm font-medium animate-pulse">
+            <span className="text-[var(--lime)] text-sm font-bold animate-pulse absolute">
               ✓ Logged!
             </span>
           )}
@@ -624,27 +634,27 @@ export default function DashboardPage() {
       </section>
 
       {/* ---------- Recent Activity ---------- */}
-      <section aria-label="Recent activity">
-        <h2 className="text-sm font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-3">
+      <section aria-label="Recent activity" className="mt-12">
+        <h2 className="text-lg font-bold text-[var(--forest-dark)] mb-4 px-2 tracking-tight">
           Recent Activity
         </h2>
-        <div className="rounded-2xl bg-white shadow-sm border border-[var(--border)] divide-y divide-[var(--border)]">
+        <div className="rounded-[32px] bg-white shadow-sm border border-[var(--border-soft)] divide-y divide-[var(--border-soft)] overflow-hidden">
           {stats.recentActivities.length === 0 ? (
-            <p className="text-center text-[var(--text-muted)] py-8">
+            <p className="text-center text-[var(--text-muted)] py-8 font-medium">
               No activities yet — use Quick Log above or visit the Log page!
             </p>
           ) : (
             stats.recentActivities.map((act) => (
               <div
                 key={act.id}
-                className="flex items-center justify-between px-5 py-3 hover:bg-gray-50 transition-colors"
+                className="flex items-center justify-between px-6 py-4 hover:bg-[var(--bg-cream)] transition-colors"
               >
-                <div className="flex items-center gap-3">
-                  <span className="text-xl" aria-hidden="true">
+                <div className="flex items-center gap-4">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--bg-cream)] text-lg shadow-sm" aria-hidden="true">
                     {CATEGORY_ICONS[act.type] ?? "📦"}
                   </span>
                   <div>
-                    <p className="text-sm font-medium">
+                    <p className="text-sm font-bold text-[var(--forest-dark)]">
                       {ACTIVITY_OPTIONS.find(o => o.value === act.type)?.label || act.type}
                       {act.outlier && (
                         <span className="ml-2 inline-block rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-700 uppercase">
@@ -652,7 +662,7 @@ export default function DashboardPage() {
                         </span>
                       )}
                     </p>
-                    <p className="text-xs text-[var(--text-muted)]">
+                    <p className="text-xs text-[var(--text-muted)] font-medium mt-0.5">
                       {act.quantity} {act.unit} ·{" "}
                       {new Date(act.date).toLocaleDateString(undefined, {
                         month: "short",
@@ -663,7 +673,7 @@ export default function DashboardPage() {
                     </p>
                   </div>
                 </div>
-                <span className="text-sm font-semibold text-[var(--accent-dark)]">
+                <span className="text-sm font-black text-[var(--forest-dark)]">
                   {formatCo2(act.co2)}
                 </span>
               </div>
