@@ -100,20 +100,20 @@ export default function LogPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto space-y-8">
+    <div className="max-w-2xl mx-auto space-y-8 animate-fade-in-up">
       {/* Title */}
       <header>
-        <h1 className="text-2xl font-bold text-[var(--text)]">Log Activity</h1>
+        <h1 className="text-2xl font-black text-[var(--forest-dark)] tracking-tight">Log Activity</h1>
         <p className="text-sm text-[var(--text-muted)] mt-1">
           Choose an activity type, enter the quantity, and log your carbon
           footprint.
         </p>
       </header>
 
-      <form onSubmit={handleSubmit} className="space-y-8">
+      <form onSubmit={handleSubmit} className="space-y-6">
         {/* ---------- Activity Selector ---------- */}
         <fieldset>
-          <legend className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-3">
+          <legend className="text-[11px] font-bold uppercase tracking-widest text-[var(--text-muted)] mb-3">
             Activity Type
           </legend>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -127,10 +127,10 @@ export default function LogPage() {
                     setSelected(act.value);
                     setShowAbsurdConfirm(false);
                   }}
-                  className={`flex flex-col items-center gap-2 rounded-[24px] border-2 p-5 transition-all
+                  className={`flex flex-col items-center gap-2 rounded-2xl border-2 p-5 transition-all duration-200
                     ${
                       isActive
-                        ? "border-[var(--lime)] bg-[var(--insight-bg)] shadow-sm scale-105"
+                        ? "border-[var(--lime)] bg-[var(--insight-bg)] shadow-sm scale-[1.03]"
                         : "border-[var(--border-soft)] bg-[var(--surface)] hover:border-[var(--lime)] hover:bg-[var(--bg-cream)]"
                     }`}
                   aria-pressed={isActive}
@@ -155,12 +155,12 @@ export default function LogPage() {
         <div>
           <label
             htmlFor="quantity"
-            className="block text-xs font-bold uppercase tracking-wider text-[var(--forest-dark)] mb-2"
+            className="block text-[11px] font-bold uppercase tracking-widest text-[var(--forest-dark)] mb-2"
           >
-            {activity.value === 'car' || activity.value === 'bus' || activity.value === 'flight' 
-              ? 'Quantity (km)' 
-              : activity.value === 'electricity' 
-              ? 'Quantity (kWh)' 
+            {activity.value === 'car' || activity.value === 'bus' || activity.value === 'flight'
+              ? 'Quantity (km)'
+              : activity.value === 'electricity'
+              ? 'Quantity (kWh)'
               : 'Quantity (meals / servings)'}
           </label>
           <div className="flex items-center gap-3">
@@ -177,9 +177,9 @@ export default function LogPage() {
                 setShowAbsurdConfirm(false);
               }}
               placeholder={`Enter ${activity.unit}`}
-              className="flex-1 rounded-full border border-[var(--border-soft)] bg-[var(--surface)] px-5 py-4 text-lg focus:outline-none focus:ring-2 focus:ring-[var(--lime)] transition-shadow shadow-sm"
+              className="flex-1 rounded-xl border border-[var(--border-soft)] bg-[var(--bg-cream)] px-5 py-4 text-lg focus:outline-none focus:ring-2 focus:ring-[var(--lime)] transition-shadow"
             />
-            <span className="text-sm font-bold text-[var(--text-muted)] uppercase tracking-widest min-w-[3rem]">
+            <span className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest min-w-[3rem]">
               {activity.unit}
             </span>
           </div>
@@ -187,7 +187,11 @@ export default function LogPage() {
 
         {/* ---------- Live CO₂ Preview ---------- */}
         {qty > 0 && (
-          <div className="rounded-[24px] bg-[var(--insight-bg)] border border-[var(--insight-border)] p-5 flex items-center justify-between shadow-sm" data-testid="live-preview">
+          <div
+            className="rounded-2xl bg-[var(--insight-bg)] border border-[var(--insight-border)] p-5 flex items-center justify-between animate-fade-in-up"
+            data-testid="live-preview"
+            style={{ boxShadow: "var(--shadow-card)" }}
+          >
             <span className="text-sm font-bold text-[var(--insight-text)]">
               Estimated CO₂
             </span>
@@ -202,8 +206,8 @@ export default function LogPage() {
 
         {/* ---------- DP2 — Absurd Input Confirmation ---------- */}
         {showAbsurdConfirm && (
-          <div className="rounded-[24px] bg-[var(--warning)]/10 border border-[var(--warning)]/30 p-5 space-y-3" data-testid="absurd-warning">
-            <p className="text-[var(--warning)] font-bold">
+          <div className="rounded-2xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 p-5 space-y-3 animate-fade-in-up" data-testid="absurd-warning">
+            <p className="text-amber-700 dark:text-amber-400 font-bold">
               ⚠️ {
                 (selected === "car" || selected === "bus") && qty >= 500000
                   ? "500,000 km is over 12× around the Earth. Did you mean 500?"
@@ -225,14 +229,14 @@ export default function LogPage() {
                 data-testid="confirm-absurd"
                 onClick={() => doSubmit(true)}
                 disabled={submitting}
-                className="rounded-full bg-[var(--warning)] px-5 py-2.5 text-sm font-bold text-white hover:opacity-90 disabled:opacity-50 transition-colors shadow-sm"
+                className="rounded-full bg-amber-500 px-5 py-2.5 text-sm font-bold text-white hover:bg-amber-600 disabled:opacity-50 transition-colors shadow-sm"
               >
                 {submitting ? "Logging…" : "Yes, log it anyway"}
               </button>
               <button
                 type="button"
                 onClick={() => setShowAbsurdConfirm(false)}
-                className="rounded-full border border-[var(--warning)] px-5 py-2.5 text-sm font-bold text-[var(--warning)] hover:bg-[var(--warning)]/10 transition-colors"
+                className="rounded-full border border-amber-400 px-5 py-2.5 text-sm font-bold text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-500/10 transition-colors"
               >
                 Edit value
               </button>
@@ -246,7 +250,8 @@ export default function LogPage() {
             type="submit"
             data-testid="submit-activity"
             disabled={submitting || qty <= 0}
-            className="w-full rounded-full bg-[var(--lime)] py-4 text-[15px] font-bold text-white hover:bg-[var(--lime-hover)] disabled:opacity-40 transition-colors shadow-sm"
+            className="w-full rounded-xl py-4 text-[15px] font-bold text-white disabled:opacity-40 transition-all shadow-sm hover:shadow-md hover:scale-[1.01] active:scale-[0.99]"
+            style={{ background: "var(--gradient-primary)" }}
           >
             {submitting ? "Logging…" : "Log Activity"}
           </button>
@@ -261,7 +266,10 @@ export default function LogPage() {
 
         {/* ---------- Success Toast ---------- */}
         {success && (
-          <div className="rounded-[24px] bg-[var(--insight-bg)] border border-[var(--insight-border)] p-5 text-center space-y-2 shadow-sm">
+          <div
+            className="rounded-2xl bg-[var(--insight-bg)] border border-[var(--insight-border)] p-5 text-center space-y-2 animate-fade-in-up"
+            style={{ boxShadow: "var(--shadow-card)" }}
+          >
             <p className="text-[var(--insight-text)] font-bold">
               ✅ Activity logged successfully!
             </p>
@@ -271,7 +279,7 @@ export default function LogPage() {
                 setSuccess(false);
                 setQuantity("");
               }}
-              className="text-sm font-bold text-[var(--forest)] hover:text-[var(--lime)] underline"
+              className="text-sm font-bold text-[var(--forest)] hover:text-[var(--lime)] underline transition-colors"
             >
               Log another activity
             </button>

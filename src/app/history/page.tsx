@@ -69,9 +69,9 @@ export default function HistoryPage() {
       const res = await fetch(`/api/activities${qs ? `?${qs}` : ""}`);
       if (!res.ok) throw new Error("Failed to load activities");
       const data = await res.json();
-      
-      const activitiesArray = Array.isArray(data?.activities) 
-        ? data.activities 
+
+      const activitiesArray = Array.isArray(data?.activities)
+        ? data.activities
         : Array.isArray(data) ? data : [];
 
       const mappedData: Activity[] = activitiesArray.map((a: any) => ({
@@ -119,10 +119,10 @@ export default function HistoryPage() {
   const hasFilters = category || startDate || endDate;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in-up">
       {/* Title */}
       <header>
-        <h1 className="text-2xl font-bold text-[var(--text)]">History</h1>
+        <h1 className="text-2xl font-black text-[var(--forest-dark)] tracking-tight">History</h1>
         <p className="text-sm text-[var(--text-muted)] mt-1">
           Browse and filter all your logged activities.
         </p>
@@ -131,11 +131,12 @@ export default function HistoryPage() {
       {/* ---------- Filter Bar ---------- */}
       <section
         aria-label="Filters"
-        className="rounded-2xl bg-[var(--surface)] p-4 shadow-sm border border-[var(--border)] space-y-4"
+        className="rounded-2xl bg-[var(--surface)] p-5 border border-[var(--border-soft)] space-y-4"
+        style={{ boxShadow: "var(--shadow-card)" }}
       >
         {/* Category pills */}
         <div>
-          <span className="block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-2">
+          <span className="block text-[11px] font-bold uppercase tracking-widest text-[var(--text-muted)] mb-2">
             Category
           </span>
           <div className="flex flex-wrap gap-2">
@@ -145,12 +146,13 @@ export default function HistoryPage() {
                 <button
                   key={cat.value}
                   onClick={() => setCategory(cat.value)}
-                  className={`rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors
+                  className={`rounded-full px-3.5 py-1.5 text-sm font-semibold transition-all duration-200
                     ${
                       active
-                        ? "bg-emerald-600 text-white shadow-sm"
-                        : "bg-gray-100 text-[var(--text-muted)] hover:bg-emerald-50 hover:text-emerald-700"
+                        ? "text-white shadow-sm"
+                        : "bg-[var(--bg-cream)] text-[var(--text-muted)] hover:bg-[var(--insight-bg)] hover:text-[var(--forest)]"
                     }`}
+                  style={active ? { background: "var(--gradient-primary)" } : {}}
                   aria-pressed={active}
                 >
                   {cat.label}
@@ -165,7 +167,7 @@ export default function HistoryPage() {
           <div>
             <label
               htmlFor="start-date"
-              className="block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1"
+              className="block text-[11px] font-bold uppercase tracking-widest text-[var(--text-muted)] mb-1"
             >
               From
             </label>
@@ -174,13 +176,13 @@ export default function HistoryPage() {
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className="rounded-lg border border-[var(--border)] px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
+              className="rounded-xl border border-[var(--border-soft)] bg-[var(--bg-cream)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--lime)] transition-shadow"
             />
           </div>
           <div>
             <label
               htmlFor="end-date"
-              className="block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1"
+              className="block text-[11px] font-bold uppercase tracking-widest text-[var(--text-muted)] mb-1"
             >
               To
             </label>
@@ -189,14 +191,14 @@ export default function HistoryPage() {
               type="date"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              className="rounded-lg border border-[var(--border)] px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
+              className="rounded-xl border border-[var(--border-soft)] bg-[var(--bg-cream)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--lime)] transition-shadow"
             />
           </div>
 
           {hasFilters && (
             <button
               onClick={clearFilters}
-              className="rounded-lg border border-[var(--border)] px-3 py-1.5 text-sm font-medium text-[var(--text-muted)] hover:bg-gray-50 transition-colors"
+              className="rounded-xl border border-[var(--border-soft)] px-4 py-2 text-sm font-semibold text-[var(--text-muted)] hover:bg-[var(--bg-cream)] hover:text-[var(--forest)] transition-colors"
             >
               Clear filters
             </button>
@@ -208,25 +210,32 @@ export default function HistoryPage() {
       <section aria-label="Activity list">
         {loading ? (
           <div className="flex items-center justify-center py-16">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-emerald-200 border-t-emerald-600" />
+            <div className="flex flex-col items-center gap-3">
+              <div className="h-10 w-10 animate-spin rounded-full border-[3px] border-[var(--border-soft)] border-t-[var(--lime)]" />
+              <span className="text-sm text-[var(--text-muted)] font-medium">Loading activities...</span>
+            </div>
           </div>
         ) : error ? (
           <div className="flex flex-col items-center gap-4 py-16">
             <p className="text-red-600 font-medium">{error}</p>
             <button
               onClick={fetchActivities}
-              className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 transition-colors"
+              className="rounded-full px-6 py-2.5 text-sm font-bold text-white transition-colors shadow-sm"
+              style={{ background: "var(--gradient-primary)" }}
             >
               Retry
             </button>
           </div>
         ) : !Array.isArray(activities) || activities.length === 0 ? (
           /* -- Empty state -- */
-          <div className="rounded-2xl bg-[var(--surface)] border border-[var(--border)] flex flex-col items-center justify-center py-16 px-4 text-center">
-            <span className="text-5xl mb-4" aria-hidden="true">
+          <div
+            className="rounded-2xl bg-[var(--surface)] border border-[var(--border-soft)] flex flex-col items-center justify-center py-16 px-4 text-center"
+            style={{ boxShadow: "var(--shadow-card)" }}
+          >
+            <span className="text-5xl mb-4 animate-float" aria-hidden="true">
               🍃
             </span>
-            <p className="text-lg font-semibold text-[var(--text)]">
+            <p className="text-lg font-bold text-[var(--forest-dark)]">
               No activities found
             </p>
             <p className="text-sm text-[var(--text-muted)] mt-1 max-w-sm">
@@ -236,26 +245,28 @@ export default function HistoryPage() {
             </p>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-2">
             {activities.map((act) => (
               <div
                 key={act.id}
-                className="rounded-2xl bg-[var(--surface)] border border-[var(--border)] shadow-sm p-4 flex items-center justify-between gap-4 hover:shadow-md transition-shadow"
+                className="rounded-2xl bg-[var(--surface)] border border-[var(--border-soft)] p-4 flex items-center justify-between gap-4 hover:shadow-md transition-all duration-200"
+                style={{ boxShadow: "var(--shadow-card)" }}
               >
                 {/* Left: icon + info */}
                 <div className="flex items-center gap-3 min-w-0">
                   <span
-                    className="text-2xl shrink-0"
+                    className="flex h-10 w-10 items-center justify-center rounded-xl text-xl shrink-0"
+                    style={{ backgroundColor: "var(--bg-cream)" }}
                     aria-hidden="true"
                   >
                     {CATEGORY_ICONS[act.type] ?? "📦"}
                   </span>
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold capitalize truncate">
+                    <p className="text-sm font-bold capitalize truncate text-[var(--forest-dark)]">
                       {act.type.replace("_", " ")}
                       {act.outlier && (
-                        <span className="ml-2 inline-block rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-700 uppercase">
-                          Outlier / Batch Entry
+                        <span className="ml-2 inline-block rounded-full bg-amber-100 dark:bg-amber-500/20 px-2 py-0.5 text-[10px] font-semibold text-amber-700 dark:text-amber-400 uppercase">
+                          Outlier
                         </span>
                       )}
                     </p>
@@ -274,7 +285,7 @@ export default function HistoryPage() {
 
                 {/* Right: CO2 + delete */}
                 <div className="flex items-center gap-3 shrink-0">
-                  <span className="text-sm font-bold text-[var(--accent-dark)]">
+                  <span className="text-sm font-black text-[var(--forest-dark)] bg-[var(--bg-cream)] rounded-full px-3 py-1">
                     {formatCo2(act.co2)}
                   </span>
 
@@ -283,13 +294,13 @@ export default function HistoryPage() {
                       <button
                         onClick={() => handleDelete(act.id)}
                         disabled={deleteInProgress}
-                        className="rounded-lg bg-red-600 px-3 py-1 text-xs font-medium text-white hover:bg-red-700 disabled:opacity-50 transition-colors"
+                        className="rounded-full bg-red-600 px-3 py-1 text-xs font-bold text-white hover:bg-red-700 disabled:opacity-50 transition-colors shadow-sm"
                       >
                         {deleteInProgress ? "…" : "Confirm"}
                       </button>
                       <button
                         onClick={() => setDeletingId(null)}
-                        className="text-xs text-[var(--text-muted)] hover:text-[var(--text)]"
+                        className="text-xs font-semibold text-[var(--text-muted)] hover:text-[var(--forest-dark)] transition-colors"
                       >
                         Cancel
                       </button>
@@ -297,7 +308,7 @@ export default function HistoryPage() {
                   ) : (
                     <button
                       onClick={() => setDeletingId(act.id)}
-                      className="rounded-lg p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                      className="rounded-xl p-2 text-[var(--text-muted)] hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"
                       aria-label={`Delete ${act.type.replace("_", " ")} activity`}
                     >
                       <svg

@@ -70,6 +70,12 @@ const CATEGORY_ICONS: Record<string, string> = {
   Food: "🍽️",
 };
 
+const CATEGORY_COLORS: Record<string, string> = {
+  Transportation: "#3B82F6",
+  Energy: "#F59E0B",
+  Food: "#10B981",
+};
+
 function formatCo2(value: number): string {
   return value >= 1000
     ? `${(value / 1000).toFixed(2)}t`
@@ -88,36 +94,44 @@ function getUnitForType(type: string): string {
   return ACTIVITY_OPTIONS.find((o) => o.value === type)?.unit ?? "";
 }
 
-/* ---------- Components ---------- */
+/* ---------- Sub-Components ---------- */
 
-function StatCard({
+function MetricCard({
   label,
   children,
-  variant = "cream",
+  className = "",
+  gradient = false,
 }: {
   label: string;
   children: React.ReactNode;
-  variant?: "cream" | "forest";
+  className?: string;
+  gradient?: boolean;
 }) {
-  const isForest = variant === "forest";
   return (
-    <section className={`rounded-[32px] p-8 shadow-sm flex flex-col gap-2 relative overflow-hidden transition-all ${
-      isForest 
-        ? "bg-[var(--forest-dark)] text-white" 
-        : "bg-[var(--bg-cream)] text-[var(--text-main)]"
-    }`}>
-      {/* Decorative top-left icon circle for flavor */}
-      <div className={`absolute -top-4 -left-4 w-20 h-20 rounded-full opacity-20 pointer-events-none ${isForest ? "bg-[var(--surface)]" : "bg-[var(--lime)]"}`} />
-      
-      <span className={`text-sm font-bold uppercase tracking-wider relative z-10 ${
-        isForest ? "text-white/80" : "text-[var(--text-muted)]"
-      }`}>
+    <div
+      className={`relative rounded-2xl p-6 overflow-hidden transition-all duration-300 hover:shadow-[var(--shadow-card-hover)] ${
+        gradient
+          ? "text-white"
+          : "bg-[var(--surface)] border border-[var(--border-soft)]"
+      } ${className}`}
+      style={{
+        boxShadow: "var(--shadow-card)",
+        ...(gradient ? { background: "var(--gradient-forest)" } : {}),
+      }}
+    >
+      {/* Subtle decorative glow */}
+      {gradient && (
+        <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-[var(--lime)] opacity-[0.08] blur-2xl pointer-events-none" />
+      )}
+      <span
+        className={`text-[11px] font-bold uppercase tracking-widest ${
+          gradient ? "text-white/60" : "text-[var(--text-muted)]"
+        }`}
+      >
         {label}
       </span>
-      <div className="relative z-10">
-        {children}
-      </div>
-    </section>
+      <div className="relative z-10 mt-2">{children}</div>
+    </div>
   );
 }
 
@@ -138,79 +152,104 @@ function BudgetBar({
   const overAmount = exceeded ? current - target : 0;
   const remaining = exceeded ? 0 : target - current;
 
-  let barColor = "bg-emerald-500";
-  if (pct >= 100) barColor = "bg-red-500";
-  else if (pct >= 70) barColor = "bg-amber-500";
+  let barGradient = "linear-gradient(90deg, #10B981 0%, #6BB536 100%)";
+  let statusBadge = { text: "Within Target", color: "bg-emerald-500/10 text-emerald-600 border-emerald-200" };
+  if (pct >= 100) {
+    barGradient = "linear-gradient(90deg, #EF4444 0%, #DC2626 100%)";
+    statusBadge = { text: "Target Exceeded", color: "bg-red-500/10 text-red-600 border-red-200" };
+  } else if (pct >= 70) {
+    barGradient = "linear-gradient(90deg, #F59E0B 0%, #EAB308 100%)";
+    statusBadge = { text: "Approaching Limit", color: "bg-amber-500/10 text-amber-600 border-amber-200" };
+  }
 
   // DP3 - Pace marker
   let paceMsg = "";
   if (weekStart) {
     const start = new Date(weekStart);
     const now = new Date();
-    // Use UTC for day diff to avoid timezone shifts
     const diffMs = now.getTime() - start.getTime();
     let daysElapsed = Math.floor(diffMs / (1000 * 60 * 60 * 24)) + 1;
     if (daysElapsed < 1) daysElapsed = 1;
     if (daysElapsed > 7) daysElapsed = 7;
     const timePct = (daysElapsed / 7) * 100;
-    
+
     if (pct > timePct && !exceeded) paceMsg = `Ahead of pace (${Math.round(timePct)}% of week gone)`;
     else if (!exceeded) paceMsg = `On track (${Math.round(timePct)}% of week gone)`;
   }
 
   return (
-    <div className="space-y-3">
-      {/* Bar */}
-      <div className="relative h-4 rounded-full bg-gray-100 overflow-hidden">
+    <div className="space-y-4">
+      {/* Header row */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-bold text-[var(--forest-dark)]">
+            {formatCo2(current)} / {formatCo2(target)}
+          </span>
+          <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${statusBadge.color}`}>
+            {statusBadge.text}
+          </span>
+        </div>
+        <span className="text-sm font-bold text-[var(--text-muted)]">{Math.round(pct)}%</span>
+      </div>
+
+      {/* Progress bar */}
+      <div className="relative h-3 rounded-full bg-[var(--bg-cream)] overflow-hidden">
         <div
-          className={`absolute inset-y-0 left-0 rounded-full transition-all duration-700 ease-out ${barColor}`}
-          style={{ width: `${clamped}%` }}
+          className="absolute inset-y-0 left-0 rounded-full transition-all duration-1000 ease-out"
+          style={{ width: `${clamped}%`, background: barGradient }}
+        />
+        {/* Glow effect on bar tip */}
+        <div
+          className="absolute inset-y-0 h-full rounded-full opacity-40 blur-sm transition-all duration-1000"
+          style={{ width: `${clamped}%`, background: barGradient }}
         />
       </div>
 
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between text-sm gap-1">
+      {/* Bottom info */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between text-sm gap-2">
         <span className="text-[var(--text-muted)]">
-          {formatCo2(current)} / {formatCo2(target)} ({Math.round(pct)}% used)
-          {paceMsg && <span className="ml-2 px-2 py-0.5 rounded bg-gray-100 text-gray-600 text-xs font-medium">{paceMsg}</span>}
-        </span>
-        <span className="font-medium text-right">
           {exceeded
             ? `Over by ${formatCo2(overAmount)}`
             : `${formatCo2(remaining)} remaining`}
+          {paceMsg && (
+            <span className="ml-2 px-2 py-0.5 rounded-full bg-[var(--bg-cream)] text-[var(--text-muted)] text-xs font-medium border border-[var(--border-soft)]">
+              {paceMsg}
+            </span>
+          )}
         </span>
       </div>
 
       {/* DP1 – The Nudge (80% early warning & Exceeded state) */}
       {exceeded ? (
-        <div className="rounded-xl bg-amber-50 border border-amber-200 p-4 flex items-start gap-3">
-          <span className="text-2xl shrink-0" aria-hidden="true">
+        <div className="rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 p-4 flex items-start gap-3 animate-fade-in-up">
+          <span className="text-2xl shrink-0 animate-float" aria-hidden="true">
             🌱
           </span>
           <div>
-            <p className="font-semibold text-amber-800">
+            <p className="font-semibold text-red-700 dark:text-red-400">
               Weekly target exceeded
             </p>
-            <p className="text-sm text-amber-700 mt-1">
+            <p className="text-sm text-red-600 dark:text-red-400/80 mt-1">
               You&apos;ve recorded {formatCo2(current)} against your {formatCo2(target)} target.
               You are {formatCo2(overAmount)} above your target.
               {largestContributor && ` Your largest contributing category this week is ${largestContributor}.`}
             </p>
-            <p className="text-sm font-medium text-amber-800 mt-2">
+            <p className="text-sm font-medium text-red-700 dark:text-red-400 mt-2">
               Tip: Swapping 2 non-veg meals for veg saves 3 kg of CO₂. Small changes add up!
             </p>
           </div>
         </div>
       ) : pct >= 80 ? (
-        <div className="rounded-xl bg-blue-50 border border-blue-200 p-4 flex items-start gap-3">
+        <div className="rounded-xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 p-4 flex items-start gap-3 animate-fade-in-up">
           <span className="text-2xl shrink-0" aria-hidden="true">
             💡
           </span>
           <div>
-            <p className="font-semibold text-blue-800">
+            <p className="font-semibold text-amber-700 dark:text-amber-400">
               Approaching your weekly target
             </p>
-            <p className="text-sm text-blue-700 mt-1">
-              You&apos;ve used {Math.round(pct)}% of your budget. 
+            <p className="text-sm text-amber-600 dark:text-amber-400/80 mt-1">
+              You&apos;ve used {Math.round(pct)}% of your budget.
               {largestContributor && ` Mind your ${largestContributor} usage to stay on track.`}
             </p>
           </div>
@@ -244,7 +283,7 @@ export default function DashboardPage() {
       const res = await fetch("/api/stats?dashboard=true");
       if (!res.ok) throw new Error("Failed to load stats");
       const data = await res.json();
-      
+
       const grouped: Record<string, number> = { Transportation: 0, Energy: 0, Food: 0 };
       for (const c of data.stats.categories) {
         if (['car', 'bus', 'flight'].includes(c.type)) grouped.Transportation += c.total_kg;
@@ -277,7 +316,7 @@ export default function DashboardPage() {
       if (mappedStats.categoryBreakdown.length > 0) {
         mappedStats.largestContributor = mappedStats.categoryBreakdown[0].category;
       }
-      
+
       setStats(mappedStats);
       setTargetDraft(String(mappedStats.weeklyTarget));
     } catch (err) {
@@ -340,7 +379,10 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-32">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-emerald-200 border-t-emerald-600" />
+        <div className="flex flex-col items-center gap-3">
+          <div className="h-10 w-10 animate-spin rounded-full border-[3px] border-[var(--border-soft)] border-t-[var(--lime)]" />
+          <span className="text-sm text-[var(--text-muted)] font-medium">Loading dashboard...</span>
+        </div>
       </div>
     );
   }
@@ -351,7 +393,7 @@ export default function DashboardPage() {
         <p className="text-red-600 font-medium">{error ?? "No data"}</p>
         <button
           onClick={fetchStats}
-          className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 transition-colors"
+          className="rounded-full bg-[var(--lime)] px-6 py-2.5 text-sm font-bold text-white hover:bg-[var(--lime-hover)] transition-colors shadow-sm"
         >
           Retry
         </button>
@@ -359,64 +401,78 @@ export default function DashboardPage() {
     );
   }
 
+  const weeklyPct = stats.weeklyTarget > 0 ? (stats.weeklyCo2 / stats.weeklyTarget) * 100 : 0;
+
   return (
     <div className="space-y-8">
-      {/* ---------- Hero Stats ---------- */}
-      <section aria-label="Key metrics">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Total */}
-          <StatCard label="Total CO₂ (all time)" variant="cream">
-            <p className="text-4xl font-black text-[var(--forest-dark)] mt-2 tracking-tight">
+      {/* ============ HERO METRICS ROW ============ */}
+      <section aria-label="Key metrics" className="stagger-children">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+          {/* --- Total Footprint --- */}
+          <MetricCard label="Total Footprint" className="animate-fade-in-up">
+            <p className="text-3xl font-black text-[var(--forest-dark)] tracking-tight mt-1 animate-count-up">
               {formatCo2(stats.totalCo2)}
             </p>
-            <span className="text-sm font-medium text-[var(--text-muted)] mt-1 inline-block">CO₂e</span>
-          </StatCard>
+            <div className="flex items-center gap-2 mt-3">
+              <span className="text-xs font-medium text-[var(--text-muted)]">CO₂e all-time</span>
+              {stats.totalCo2 > 0 && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-[var(--insight-bg)] px-2 py-0.5 text-[10px] font-semibold text-[var(--insight-text)]">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
+                    <polyline points="22 17 13.5 8.5 8.5 13.5 2 7" />
+                  </svg>
+                  {stats.recentActivities.length} entries
+                </span>
+              )}
+            </div>
+          </MetricCard>
 
-          {/* This week */}
-          <StatCard label="This week" variant="forest">
-            <p className="text-4xl font-black text-white mt-2 tracking-tight">
-              {formatCo2(stats.weeklyCo2)}
-            </p>
-            <div className="mt-4 flex items-center justify-between">
+          {/* --- This Week (Gradient) --- */}
+          <MetricCard label="This Week" gradient className="animate-fade-in-up">
+            <div className="flex items-end justify-between gap-4">
+              <div>
+                <p className="text-3xl font-black tracking-tight mt-1 animate-count-up">
+                  {formatCo2(stats.weeklyCo2)}
+                </p>
+                <span className="text-xs font-medium text-white/50 mt-1 block">
+                  {formatDateRange(stats.weekStart, stats.weekEnd)}
+                </span>
+              </div>
+
               {/* Circular gauge */}
-              <div className="relative">
+              <div className="relative shrink-0">
                 <svg
                   viewBox="0 0 36 36"
                   className="w-16 h-16 drop-shadow-md"
-                  aria-label={`${Math.round(
-                    (stats.weeklyCo2 / stats.weeklyTarget) * 100
-                  )}% of weekly target`}
+                  aria-label={`${Math.round(weeklyPct)}% of weekly target`}
                 >
                   <path
                     d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                     fill="none"
-                    stroke="rgba(255,255,255,0.2)"
-                    strokeWidth="4"
+                    stroke="rgba(255,255,255,0.12)"
+                    strokeWidth="3.5"
                   />
                   <path
                     d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                     fill="none"
                     stroke="var(--lime)"
-                    strokeWidth="4"
-                    strokeDasharray={`${Math.min(
-                      (stats.weeklyCo2 / stats.weeklyTarget) * 100,
-                      100
-                    )}, 100`}
+                    strokeWidth="3.5"
+                    strokeDasharray={`${Math.min(weeklyPct, 100)}, 100`}
                     className="transition-all duration-1000 ease-out"
                     strokeLinecap="round"
                   />
                 </svg>
                 <div className="absolute inset-0 flex items-center justify-center font-bold text-xs text-white">
-                  {Math.round((stats.weeklyCo2 / stats.weeklyTarget) * 100)}%
+                  {Math.round(weeklyPct)}%
                 </div>
               </div>
             </div>
-          </StatCard>
+          </MetricCard>
 
-          {/* Weekly target */}
-          <StatCard label="Weekly Target" variant="cream">
+          {/* --- Weekly Target & Budget --- */}
+          <MetricCard label="Weekly Target" className="animate-fade-in-up">
             {editingTarget ? (
-              <div className="flex flex-col gap-3 mt-2">
+              <div className="flex flex-col gap-3 mt-1">
                 <div className="flex items-center gap-2">
                   <input
                     type="number"
@@ -424,16 +480,17 @@ export default function DashboardPage() {
                     step="any"
                     value={targetDraft}
                     onChange={(e) => setTargetDraft(e.target.value)}
-                    className="w-24 rounded-xl border border-[var(--border-soft)] bg-[var(--surface)] px-3 py-2 text-lg font-bold text-[var(--forest-dark)] focus:outline-none focus:ring-2 focus:ring-[var(--lime)]"
+                    className="w-24 rounded-xl border border-[var(--border-soft)] bg-[var(--bg-cream)] px-3 py-2 text-lg font-bold text-[var(--forest-dark)] focus:outline-none focus:ring-2 focus:ring-[var(--lime)]"
                     aria-label="Weekly target in kg CO₂e"
                   />
-                  <span className="text-sm font-medium text-[var(--text-muted)]">kg</span>
+                  <span className="text-xs font-medium text-[var(--text-muted)]">kg CO₂e</span>
                 </div>
                 <div className="flex gap-2">
                   <button
                     onClick={handleSaveTarget}
                     disabled={savingTarget}
-                    className="flex-1 rounded-full bg-[var(--lime)] px-3 py-1.5 text-sm font-bold text-white hover:bg-[var(--lime-hover)] disabled:opacity-50 transition-colors shadow-sm"
+                    className="flex-1 rounded-full py-2 text-sm font-bold text-white disabled:opacity-50 transition-all shadow-sm"
+                    style={{ background: "var(--gradient-primary)" }}
                   >
                     {savingTarget ? "…" : "Save"}
                   </button>
@@ -442,57 +499,100 @@ export default function DashboardPage() {
                       setEditingTarget(false);
                       setTargetDraft(String(stats.weeklyTarget));
                     }}
-                    className="flex-1 rounded-full bg-[var(--surface)] px-3 py-1.5 text-sm font-bold text-[var(--text-muted)] hover:text-[var(--forest)] hover:bg-gray-50 border border-[var(--border-soft)] transition-colors"
+                    className="flex-1 rounded-full bg-[var(--bg-cream)] py-2 text-sm font-bold text-[var(--text-muted)] hover:text-[var(--forest)] border border-[var(--border-soft)] transition-colors"
                   >
                     Cancel
                   </button>
                 </div>
               </div>
             ) : (
-              <div className="mt-2">
-                <p className="text-4xl font-black text-[var(--forest-dark)] tracking-tight">
+              <div className="mt-1">
+                <p className="text-3xl font-black text-[var(--forest-dark)] tracking-tight animate-count-up">
                   {formatCo2(stats.weeklyTarget)}
                 </p>
                 <div className="flex items-center justify-between mt-3">
-                  <span className="text-sm font-medium text-[var(--text-muted)]">kg CO₂e</span>
+                  <span className="text-xs font-medium text-[var(--text-muted)]">kg CO₂e / week</span>
                   <button
                     onClick={() => setEditingTarget(true)}
-                    className="rounded-full bg-[var(--surface)] border border-[var(--border-soft)] px-4 py-1.5 text-sm font-bold text-[var(--forest)] hover:bg-[var(--lime)] hover:text-white hover:border-[var(--lime)] transition-colors shadow-sm"
+                    className="rounded-full bg-[var(--bg-cream)] border border-[var(--border-soft)] px-3 py-1 text-xs font-bold text-[var(--forest)] hover:bg-[var(--lime)] hover:text-white hover:border-[var(--lime)] transition-all shadow-sm"
                   >
                     ✏️ Edit
                   </button>
                 </div>
               </div>
             )}
-          </StatCard>
+          </MetricCard>
         </div>
       </section>
 
-      {/* ---------- Weekly Budget Gauge ---------- */}
-      <section aria-label="Weekly budget progress" className="mt-12">
-        <div className="flex justify-between items-baseline mb-4 px-2">
-          <h2 className="text-lg font-bold text-[var(--forest-dark)] tracking-tight">
+      {/* ============ CATEGORY QUICK CHIPS ============ */}
+      {stats.categoryBreakdown.length > 0 && (
+        <section aria-label="Category breakdown chips" className="animate-fade-in-up" style={{ animationDelay: "0.15s" }}>
+          <div className="flex flex-wrap gap-3">
+            {stats.categoryBreakdown.map((cat) => (
+              <div
+                key={cat.category}
+                className="flex items-center gap-2.5 rounded-2xl bg-[var(--surface)] border border-[var(--border-soft)] px-4 py-3 shadow-sm hover:shadow-md transition-all duration-200 hover:scale-[1.02]"
+                style={{ boxShadow: "var(--shadow-card)" }}
+              >
+                <span
+                  className="flex h-9 w-9 items-center justify-center rounded-xl text-lg"
+                  style={{ backgroundColor: `${CATEGORY_COLORS[cat.category] ?? "#6B7F6B"}15` }}
+                >
+                  {CATEGORY_ICONS[cat.category] ?? "📦"}
+                </span>
+                <div>
+                  <p className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">{cat.category}</p>
+                  <p className="text-sm font-black text-[var(--forest-dark)]">{formatCo2(cat.totalCo2)}</p>
+                </div>
+                {stats.weeklyCo2 > 0 && (
+                  <span
+                    className="ml-1 rounded-full px-2 py-0.5 text-[10px] font-bold text-white"
+                    style={{ backgroundColor: CATEGORY_COLORS[cat.category] ?? "#6B7F6B" }}
+                  >
+                    {Math.round((cat.totalCo2 / stats.weeklyCo2) * 100)}%
+                  </span>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* ============ WEEKLY BUDGET GAUGE ============ */}
+      <section aria-label="Weekly budget progress" className="animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
+        <div className="flex justify-between items-baseline mb-3 px-1">
+          <h2 className="text-base font-bold text-[var(--forest-dark)] tracking-tight">
             Weekly Budget
           </h2>
-          <span className="text-sm text-[var(--text-muted)] font-medium bg-[var(--bg-cream)] px-3 py-1 rounded-full">
+          <span className="text-xs text-[var(--text-muted)] font-medium bg-[var(--bg-cream)] px-3 py-1 rounded-full border border-[var(--border-soft)]">
             {formatDateRange(stats.weekStart, stats.weekEnd)}
           </span>
         </div>
-        <div className="rounded-[32px] bg-[var(--bg-cream)] p-8 shadow-sm">
+        <div
+          className="rounded-2xl bg-[var(--surface)] border border-[var(--border-soft)] p-6"
+          style={{ boxShadow: "var(--shadow-card)" }}
+        >
           <BudgetBar current={stats.weeklyCo2} target={stats.weeklyTarget} largestContributor={stats.largestContributor} weekStart={stats.weekStart} />
         </div>
       </section>
 
-      {/* ---------- Category Breakdown ---------- */}
-      <section aria-label="Category breakdown" className="mt-12">
-        <h2 className="text-lg font-bold text-[var(--forest-dark)] mb-4 px-2 tracking-tight">
+      {/* ============ CATEGORY BREAKDOWN CHART ============ */}
+      <section aria-label="Category breakdown" className="animate-fade-in-up" style={{ animationDelay: "0.25s" }}>
+        <h2 className="text-base font-bold text-[var(--forest-dark)] mb-3 px-1 tracking-tight">
           CO₂ by Category
         </h2>
-        <div className="rounded-[32px] bg-[var(--surface)] p-8 shadow-sm border border-[var(--border-soft)]">
+        <div
+          className="rounded-2xl bg-[var(--surface)] border border-[var(--border-soft)] p-6"
+          style={{ boxShadow: "var(--shadow-card)" }}
+        >
           {stats.categoryBreakdown.length === 0 ? (
-            <p className="text-center text-[var(--text-muted)] py-8">
-              No activities logged this week. Start by recording your first activity.
-            </p>
+            <div className="text-center py-12">
+              <span className="text-4xl block mb-3" aria-hidden="true">🍃</span>
+              <p className="text-[var(--text-muted)] font-medium">
+                No activities logged this week. Start by recording your first activity.
+              </p>
+            </div>
           ) : (
             <div className="flex flex-col md:flex-row items-center gap-6">
               <div className="w-full md:w-1/3 h-64">
@@ -520,6 +620,13 @@ export default function DashboardPage() {
                         `${Number(value).toFixed(2)} kg`,
                         "CO₂e",
                       ]}
+                      contentStyle={{
+                        borderRadius: "12px",
+                        border: "1px solid var(--border-soft)",
+                        background: "var(--surface)",
+                        boxShadow: "var(--shadow-elevated)",
+                        fontSize: "13px",
+                      }}
                     />
                     <Legend />
                   </PieChart>
@@ -528,15 +635,15 @@ export default function DashboardPage() {
 
               <div className="w-full md:w-2/3 flex flex-col gap-4">
                 {stats.largestContributor && stats.weeklyCo2 > 0 && (
-                  <div className="rounded-2xl bg-[var(--insight-bg)] border border-[var(--insight-border)] p-5">
+                  <div className="rounded-xl bg-[var(--insight-bg)] border border-[var(--insight-border)] p-4">
                     <p className="text-sm text-[var(--insight-text)]">
-                      <span className="font-black text-lg block mb-1">💡 Insight</span>
+                      <span className="font-black text-base block mb-1">💡 Insight</span>
                       {stats.largestContributor} is{" "}
                       <strong>{Math.round((stats.categoryBreakdown[0].totalCo2 / stats.weeklyCo2) * 100)}%</strong> of your footprint this week.
                     </p>
                   </div>
                 )}
-                <ul className="space-y-2">
+                <ul className="space-y-1">
                   {stats.categoryBreakdown.map((cat, idx) => (
                     <li
                       key={cat.category}
@@ -544,42 +651,43 @@ export default function DashboardPage() {
                     >
                       <div className="flex items-center gap-3">
                         <span
-                          className="inline-block w-4 h-4 rounded-full shadow-sm"
+                          className="inline-block w-3 h-3 rounded-full shadow-sm"
                           style={{
-                          backgroundColor:
-                            CHART_COLORS[idx % CHART_COLORS.length],
-                        }}
-                      />
-                      <span className="text-sm font-bold text-[var(--forest-dark)]">
-                        {CATEGORY_ICONS[cat.category] ?? "📦"}{" "}
-                        {cat.category.replace("_", " ")}
+                            backgroundColor:
+                              CHART_COLORS[idx % CHART_COLORS.length],
+                          }}
+                        />
+                        <span className="text-sm font-bold text-[var(--forest-dark)]">
+                          {CATEGORY_ICONS[cat.category] ?? "📦"}{" "}
+                          {cat.category.replace("_", " ")}
+                        </span>
+                      </div>
+                      <span className="text-sm font-black text-[var(--forest-dark)]">
+                        {formatCo2(cat.totalCo2)}
                       </span>
-                    </div>
-                    <span className="text-sm font-black text-[var(--forest-dark)]">
-                      {formatCo2(cat.totalCo2)}
-                    </span>
-                  </li>
-                ))}
-              </ul>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
-          </div>
           )}
         </div>
       </section>
 
-      {/* ---------- Quick Log ---------- */}
-      <section aria-label="Quick log" className="mt-12">
-        <h2 className="text-lg font-bold text-[var(--forest-dark)] mb-4 px-2 tracking-tight">
+      {/* ============ QUICK LOG ============ */}
+      <section aria-label="Quick log" className="animate-fade-in-up" style={{ animationDelay: "0.3s" }}>
+        <h2 className="text-base font-bold text-[var(--forest-dark)] mb-3 px-1 tracking-tight">
           Quick Log
         </h2>
         <form
           onSubmit={handleQuickLog}
-          className="rounded-[32px] bg-[var(--bg-cream)] p-8 shadow-sm flex flex-col sm:flex-row items-end gap-4"
+          className="rounded-2xl bg-[var(--surface)] border border-[var(--border-soft)] p-6 flex flex-col sm:flex-row items-end gap-4 relative"
+          style={{ boxShadow: "var(--shadow-card)" }}
         >
           <div className="flex-1 w-full">
             <label
               htmlFor="ql-type"
-              className="block text-xs font-bold text-[var(--text-muted)] mb-2 uppercase tracking-wider"
+              className="block text-[11px] font-bold text-[var(--text-muted)] mb-2 uppercase tracking-widest"
             >
               Activity
             </label>
@@ -587,7 +695,7 @@ export default function DashboardPage() {
               id="ql-type"
               value={qlType}
               onChange={(e) => setQlType(e.target.value)}
-              className="w-full rounded-full border border-[var(--border-soft)] bg-[var(--surface)] px-5 py-3 text-[15px] font-medium focus:outline-none focus:ring-2 focus:ring-[var(--lime)] shadow-sm"
+              className="w-full rounded-xl border border-[var(--border-soft)] bg-[var(--bg-cream)] px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[var(--lime)] transition-shadow"
             >
               {ACTIVITY_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -600,7 +708,7 @@ export default function DashboardPage() {
           <div className="w-full sm:w-48">
             <label
               htmlFor="ql-qty"
-              className="block text-xs font-bold text-[var(--text-muted)] mb-2 uppercase tracking-wider"
+              className="block text-[11px] font-bold text-[var(--text-muted)] mb-2 uppercase tracking-widest"
             >
               Quantity ({getUnitForType(qlType)})
             </label>
@@ -613,77 +721,90 @@ export default function DashboardPage() {
               value={qlQty}
               onChange={(e) => setQlQty(e.target.value)}
               placeholder="e.g. 15"
-              className="w-full rounded-full border border-[var(--border-soft)] bg-[var(--surface)] px-5 py-3 text-[15px] font-medium focus:outline-none focus:ring-2 focus:ring-[var(--lime)] shadow-sm"
+              className="w-full rounded-xl border border-[var(--border-soft)] bg-[var(--bg-cream)] px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[var(--lime)] transition-shadow"
             />
           </div>
 
           <button
             type="submit"
             disabled={qlSubmitting}
-            className="rounded-full bg-[var(--lime)] px-8 py-3 text-[15px] font-bold text-white hover:bg-[var(--lime-hover)] disabled:opacity-50 transition-colors whitespace-nowrap shadow-sm"
+            className="rounded-xl px-6 py-3 text-sm font-bold text-white disabled:opacity-50 transition-all whitespace-nowrap shadow-sm hover:shadow-md hover:scale-[1.02] active:scale-[0.98]"
+            style={{ background: "var(--gradient-primary)" }}
           >
             {qlSubmitting ? "Logging…" : "Log Activity"}
           </button>
 
           {qlSuccess && (
-            <span className="text-[var(--lime)] text-sm font-bold animate-pulse absolute">
+            <span className="absolute -bottom-7 left-1/2 -translate-x-1/2 text-[var(--lime)] text-sm font-bold animate-fade-in-up">
               ✓ Logged!
             </span>
           )}
         </form>
       </section>
 
-      {/* ---------- Recent Activity ---------- */}
-      <section aria-label="Recent activity" className="mt-12">
-        <h2 className="text-lg font-bold text-[var(--forest-dark)] mb-4 px-2 tracking-tight">
+      {/* ============ RECENT ACTIVITY ============ */}
+      <section aria-label="Recent activity" className="animate-fade-in-up" style={{ animationDelay: "0.35s" }}>
+        <h2 className="text-base font-bold text-[var(--forest-dark)] mb-3 px-1 tracking-tight">
           Recent Activity
         </h2>
-        <div className="rounded-[32px] bg-[var(--surface)] shadow-sm border border-[var(--border-soft)] divide-y divide-[var(--border-soft)] overflow-hidden">
+        <div
+          className="rounded-2xl bg-[var(--surface)] border border-[var(--border-soft)] overflow-hidden"
+          style={{ boxShadow: "var(--shadow-card)" }}
+        >
           {stats.recentActivities.length === 0 ? (
-            <p className="text-center text-[var(--text-muted)] py-8 font-medium">
-              No activities yet — use Quick Log above or visit the Log page!
-            </p>
+            <div className="text-center py-12">
+              <span className="text-4xl block mb-3" aria-hidden="true">📝</span>
+              <p className="text-[var(--text-muted)] font-medium">
+                No activities yet — use Quick Log above or visit the Log page!
+              </p>
+            </div>
           ) : (
-            stats.recentActivities.map((act) => (
-              <div
-                key={act.id}
-                className="flex items-center justify-between px-6 py-4 hover:bg-[var(--bg-cream)] transition-colors"
-              >
-                <div className="flex items-center gap-4">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--bg-cream)] text-lg shadow-sm" aria-hidden="true">
-                    {CATEGORY_ICONS[act.type] ?? "📦"}
-                  </span>
-                  <div>
-                    <p className="text-sm font-bold text-[var(--forest-dark)]">
-                      {ACTIVITY_OPTIONS.find(o => o.value === act.type)?.label || act.type}
-                      {act.outlier && (
-                        <span className="ml-2 inline-block rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-700 uppercase">
-                          Outlier / Batch Entry
-                        </span>
-                      )}
-                    </p>
-                    <p className="text-xs text-[var(--text-muted)] font-medium mt-0.5">
-                      {act.quantity} {act.unit} ·{" "}
-                      {new Date(act.date).toLocaleDateString(undefined, {
-                        month: "short",
-                        day: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </p>
+            <div className="divide-y divide-[var(--border-soft)]">
+              {stats.recentActivities.map((act) => (
+                <div
+                  key={act.id}
+                  className="flex items-center justify-between px-5 py-4 hover:bg-[var(--bg-cream)] transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <span
+                      className="flex h-10 w-10 items-center justify-center rounded-xl text-lg"
+                      style={{ backgroundColor: "var(--bg-cream)" }}
+                      aria-hidden="true"
+                    >
+                      {CATEGORY_ICONS[act.type] ?? "📦"}
+                    </span>
+                    <div>
+                      <p className="text-sm font-bold text-[var(--forest-dark)]">
+                        {ACTIVITY_OPTIONS.find(o => o.value === act.type)?.label || act.type}
+                        {act.outlier && (
+                          <span className="ml-2 inline-block rounded-full bg-amber-100 dark:bg-amber-500/20 px-2 py-0.5 text-[10px] font-semibold text-amber-700 dark:text-amber-400 uppercase">
+                            Outlier
+                          </span>
+                        )}
+                      </p>
+                      <p className="text-xs text-[var(--text-muted)] font-medium mt-0.5">
+                        {act.quantity} {act.unit} ·{" "}
+                        {new Date(act.date).toLocaleDateString(undefined, {
+                          month: "short",
+                          day: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </p>
+                    </div>
                   </div>
+                  <span className="text-sm font-black text-[var(--forest-dark)] bg-[var(--bg-cream)] rounded-full px-3 py-1">
+                    {formatCo2(act.co2)}
+                  </span>
                 </div>
-                <span className="text-sm font-black text-[var(--forest-dark)]">
-                  {formatCo2(act.co2)}
-                </span>
-              </div>
-            ))
+              ))}
+            </div>
           )}
         </div>
       </section>
 
-      {/* ---------- Admin Tools ---------- */}
-      <section aria-label="Developer tools" className="pt-8 border-t border-[var(--border)] mt-8 flex justify-center gap-6 text-sm">
+      {/* ============ ADMIN TOOLS ============ */}
+      <section aria-label="Developer tools" className="pt-6 border-t border-[var(--border-soft)] mt-4 flex justify-center gap-6 text-sm">
         <button
           data-testid="load-sample-data"
           onClick={async () => {
@@ -701,7 +822,7 @@ export default function DashboardPage() {
             }
             fetchStats();
           }}
-          className="text-[var(--text-muted)] hover:text-emerald-600 font-medium transition-colors"
+          className="text-[var(--text-muted)] hover:text-[var(--lime)] font-medium transition-colors"
         >
           Load Sample Data
         </button>
