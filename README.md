@@ -8,7 +8,7 @@
 
 ## 🚀 Live Demo
 
-🔗 **[planetpulse.vercel.app](https://planetpulse.vercel.app)** *(update after deployment)*
+🔗 **[planet-pulse-five.vercel.app](https://planet-pulse-five.vercel.app/)**
 
 ## 🏗️ Tech Stack
 
