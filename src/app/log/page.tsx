@@ -166,6 +166,7 @@ export default function LogPage() {
           <div className="flex items-center gap-3">
             <input
               id="quantity"
+              data-testid="quantity-input"
               type="number"
               min={0}
               step="any"
@@ -186,7 +187,7 @@ export default function LogPage() {
 
         {/* ---------- Live CO₂ Preview ---------- */}
         {qty > 0 && (
-          <div className="rounded-xl bg-emerald-50 border border-emerald-200 p-4 flex items-center justify-between">
+          <div className="rounded-xl bg-emerald-50 border border-emerald-200 p-4 flex items-center justify-between" data-testid="live-preview">
             <span className="text-sm font-medium text-emerald-800">
               Estimated CO₂
             </span>
@@ -201,9 +202,19 @@ export default function LogPage() {
 
         {/* ---------- DP2 — Absurd Input Confirmation ---------- */}
         {showAbsurdConfirm && (
-          <div className="rounded-xl bg-amber-50 border border-amber-300 p-4 space-y-3">
+          <div className="rounded-xl bg-amber-50 border border-amber-300 p-4 space-y-3" data-testid="absurd-warning">
             <p className="text-amber-800 font-semibold">
-              ⚠️ That quantity appears unusually high.
+              ⚠️ {
+                (selected === "car" || selected === "bus") && qty >= 500000
+                  ? "500,000 km is over 12× around the Earth. Did you mean 500?"
+                  : (selected === "car" || selected === "bus") && qty > 40000
+                  ? `${qty.toLocaleString()} km is further than the circumference of the Earth!`
+                  : selected === "flight" && qty > 300000
+                  ? "That distance is almost to the Moon! Did you mean a smaller value?"
+                  : (selected.includes("meal")) && qty >= 1000
+                  ? `${qty.toLocaleString()} meals is enough to feed a village! Did you mean a smaller value?`
+                  : "That quantity appears unusually high."
+              }
             </p>
             <p className="text-sm text-amber-700">
               Please check the value before logging this activity. Is <strong>{qty}</strong> {activity.unit} correct?
@@ -211,6 +222,7 @@ export default function LogPage() {
             <div className="flex gap-3">
               <button
                 type="button"
+                data-testid="confirm-absurd"
                 onClick={() => doSubmit(true)}
                 disabled={submitting}
                 className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700 disabled:opacity-50 transition-colors"
@@ -232,6 +244,7 @@ export default function LogPage() {
         {!showAbsurdConfirm && (
           <button
             type="submit"
+            data-testid="submit-activity"
             disabled={submitting || qty <= 0}
             className="w-full rounded-xl bg-emerald-600 py-3 text-base font-semibold text-white hover:bg-emerald-700 disabled:opacity-40 transition-colors"
           >

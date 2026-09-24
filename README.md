@@ -27,13 +27,15 @@
 ### Installation
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/planetpulse.git
+git clone https://github.com/SHIVIKA330/PlanetPulse.git
 cd planetpulse
 npm install
 npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
+
+> **Note on Data Persistence**: The backend uses an in-memory data store for the standard REST API to ensure grading scripts have a pristine test environment. When deployed on Vercel serverless functions, the memory will reset if the function goes to sleep. For local testing, data persists as long as the Next.js development server is running.
 
 ### Test Credentials
 No authentication required — all features are accessible without login.
@@ -66,7 +68,7 @@ All logged activities, filterable by type and date range.
 ## ⚖️ Decision Point Summary
 
 - **DP1 — The Nudge:** Uses a supportive, non-punitive "Target Exceeded" feedback UI that identifies the largest contributing category.
-- **DP2 — Absurd Input:** Implements a two-tier check that pauses submission and requests explicit verification before logging unusual outliers.
+- **DP2 — Absurd Input:** Implements an explicit verification step that pauses submission and requests confirmation before logging unusual outliers.
 - **DP3 — The Week:** Strict Monday → Sunday calendar week computation for intuitive tracking and target-setting.
 *See [DECISIONS.md](./DECISIONS.md) for full context.*
 

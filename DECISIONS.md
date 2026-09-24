@@ -14,7 +14,7 @@ Behavioral research shows that punitive measures (like blocking input or using a
 For obviously unrealistic values (like 500,000 km car travel), we implement an explicit verification step that prevents accidental submission without silently clamping or rejecting the data. 
 
 **Explanation:**
-Silently modifying user data violates data integrity, and strict hard-limits prevent legitimate edge cases (like batch-logging annual flights). When a user enters an unusually high quantity, the app halts the submission and displays an amber warning: "⚠️ That quantity appears unusually high. Please check the value before logging this activity." The user must explicitly click "Yes, log it anyway" to proceed, ensuring intentionality while preserving normal CRUD operations for legitimate values.
+Silently modifying user data violates data integrity, and strict hard-limits prevent legitimate edge cases (like batch-logging annual flights). When a user enters an unusually high quantity, the app halts the submission and displays a contextual amber warning (e.g., "500,000 km is over 12× around the Earth. Did you mean 500?"). The user must explicitly click "Yes, log it anyway" to proceed, ensuring intentionality while preserving normal CRUD operations for legitimate values. Negative, zero, and NaN inputs are hard-rejected with a 400 error.
 
 ## DP3: The Week
 

@@ -50,12 +50,12 @@ const ACTIVITY_OPTIONS = [
 ] as const;
 
 const CHART_COLORS = [
-  "#059669",
-  "#10B981",
-  "#34D399",
-  "#6EE7B7",
-  "#A7F3D0",
-  "#D1FAE5",
+  "#10B981", // Emerald
+  "#3B82F6", // Blue
+  "#F59E0B", // Amber
+  "#8B5CF6", // Violet
+  "#EC4899", // Pink
+  "#06B6D4", // Cyan
 ];
 
 const CATEGORY_ICONS: Record<string, string> = {
@@ -69,13 +69,13 @@ const CATEGORY_ICONS: Record<string, string> = {
 
 function formatCo2(value: number): string {
   return value >= 1000
-    ? `${(value / 1000).toFixed(1)}t`
-    : `${value.toFixed(1)} kg`;
+    ? `${(value / 1000).toFixed(2)}t`
+    : `${value.toFixed(2)} kg`;
 }
 
 function formatDateRange(startIso?: string, endIso?: string) {
   if (!startIso || !endIso) return "";
-  const opts: Intl.DateTimeFormatOptions = { weekday: 'short', month: 'short', day: 'numeric' };
+  const opts: Intl.DateTimeFormatOptions = { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'UTC' };
   const s = new Date(startIso).toLocaleDateString(undefined, opts);
   const e = new Date(endIso).toLocaleDateString(undefined, opts);
   return `${s} – ${e}`;
@@ -108,10 +108,12 @@ function BudgetBar({
   current,
   target,
   largestContributor,
+  weekStart,
 }: {
   current: number;
   target: number;
   largestContributor?: string;
+  weekStart?: string;
 }) {
   const pct = target > 0 ? (current / target) * 100 : 0;
   const clamped = Math.min(pct, 100);
@@ -123,6 +125,22 @@ function BudgetBar({
   if (pct >= 100) barColor = "bg-red-500";
   else if (pct >= 70) barColor = "bg-amber-500";
 
+  // DP3 - Pace marker
+  let paceMsg = "";
+  if (weekStart) {
+    const start = new Date(weekStart);
+    const now = new Date();
+    // Use UTC for day diff to avoid timezone shifts
+    const diffMs = now.getTime() - start.getTime();
+    let daysElapsed = Math.floor(diffMs / (1000 * 60 * 60 * 24)) + 1;
+    if (daysElapsed < 1) daysElapsed = 1;
+    if (daysElapsed > 7) daysElapsed = 7;
+    const timePct = (daysElapsed / 7) * 100;
+    
+    if (pct > timePct && !exceeded) paceMsg = `Ahead of pace (${Math.round(timePct)}% of week gone)`;
+    else if (!exceeded) paceMsg = `On track (${Math.round(timePct)}% of week gone)`;
+  }
+
   return (
     <div className="space-y-3">
       {/* Bar */}
@@ -133,19 +151,20 @@ function BudgetBar({
         />
       </div>
 
-      <div className="flex items-center justify-between text-sm">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between text-sm gap-1">
         <span className="text-[var(--text-muted)]">
-          {formatCo2(current)} / {formatCo2(target)} ({Math.round(pct)}%)
+          {formatCo2(current)} / {formatCo2(target)} ({Math.round(pct)}% used)
+          {paceMsg && <span className="ml-2 px-2 py-0.5 rounded bg-gray-100 text-gray-600 text-xs font-medium">{paceMsg}</span>}
         </span>
-        <span className="font-medium">
+        <span className="font-medium text-right">
           {exceeded
             ? `Over by ${formatCo2(overAmount)}`
             : `${formatCo2(remaining)} remaining`}
         </span>
       </div>
 
-      {/* DP1 – The Nudge */}
-      {exceeded && (
+      {/* DP1 – The Nudge (80% early warning & Exceeded state) */}
+      {exceeded ? (
         <div className="rounded-xl bg-amber-50 border border-amber-200 p-4 flex items-start gap-3">
           <span className="text-2xl shrink-0" aria-hidden="true">
             🌱
@@ -159,9 +178,27 @@ function BudgetBar({
               You are {formatCo2(overAmount)} above your target.
               {largestContributor && ` Your largest contributing category this week is ${largestContributor}.`}
             </p>
+            <p className="text-sm font-medium text-amber-800 mt-2">
+              Tip: Swapping 2 non-veg meals for veg saves 3 kg of CO₂. Small changes add up!
+            </p>
           </div>
         </div>
-      )}
+      ) : pct >= 80 ? (
+        <div className="rounded-xl bg-blue-50 border border-blue-200 p-4 flex items-start gap-3">
+          <span className="text-2xl shrink-0" aria-hidden="true">
+            💡
+          </span>
+          <div>
+            <p className="font-semibold text-blue-800">
+              Approaching your weekly target
+            </p>
+            <p className="text-sm text-blue-700 mt-1">
+              You&apos;ve used {Math.round(pct)}% of your budget. 
+              {largestContributor && ` Mind your ${largestContributor} usage to stay on track.`}
+            </p>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -424,7 +461,7 @@ export default function DashboardPage() {
           </span>
         </div>
         <div className="rounded-2xl bg-white p-5 shadow-sm border border-[var(--border)]">
-          <BudgetBar current={stats.weeklyCo2} target={stats.weeklyTarget} largestContributor={stats.largestContributor} />
+          <BudgetBar current={stats.weeklyCo2} target={stats.weeklyTarget} largestContributor={stats.largestContributor} weekStart={stats.weekStart} />
         </div>
       </section>
 
@@ -436,11 +473,11 @@ export default function DashboardPage() {
         <div className="rounded-2xl bg-white p-5 shadow-sm border border-[var(--border)]">
           {stats.categoryBreakdown.length === 0 ? (
             <p className="text-center text-[var(--text-muted)] py-8">
-              No activities logged yet. Start logging to see your breakdown!
+              No activities logged this week. Start by recording your first activity.
             </p>
           ) : (
             <div className="flex flex-col md:flex-row items-center gap-6">
-              <div className="w-full md:w-1/2 h-64">
+              <div className="w-full md:w-1/3 h-64">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
@@ -462,7 +499,7 @@ export default function DashboardPage() {
                     </Pie>
                     <Tooltip
                       formatter={(value: any) => [
-                        `${Number(value).toFixed(1)} kg`,
+                        `${Number(value).toFixed(2)} kg`,
                         "CO₂e",
                       ]}
                     />
@@ -471,16 +508,26 @@ export default function DashboardPage() {
                 </ResponsiveContainer>
               </div>
 
-              <ul className="w-full md:w-1/2 space-y-2">
-                {stats.categoryBreakdown.map((cat, idx) => (
-                  <li
-                    key={cat.category}
-                    className="flex items-center justify-between rounded-lg px-3 py-2 hover:bg-gray-50 transition-colors"
-                  >
-                    <div className="flex items-center gap-2">
-                      <span
-                        className="inline-block w-3 h-3 rounded-full"
-                        style={{
+              <div className="w-full md:w-2/3 flex flex-col gap-4">
+                {stats.largestContributor && stats.weeklyCo2 > 0 && (
+                  <div className="rounded-xl bg-blue-50 border border-blue-200 p-4">
+                    <p className="text-sm text-blue-800">
+                      <span className="font-bold text-lg block mb-1">💡 Insight</span>
+                      {stats.largestContributor} is{" "}
+                      <strong>{Math.round((stats.categoryBreakdown[0].totalCo2 / stats.weeklyCo2) * 100)}%</strong> of your footprint this week.
+                    </p>
+                  </div>
+                )}
+                <ul className="space-y-2">
+                  {stats.categoryBreakdown.map((cat, idx) => (
+                    <li
+                      key={cat.category}
+                      className="flex items-center justify-between rounded-lg px-3 py-2 hover:bg-gray-50 transition-colors"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span
+                          className="inline-block w-3 h-3 rounded-full"
+                          style={{
                           backgroundColor:
                             CHART_COLORS[idx % CHART_COLORS.length],
                         }}
@@ -497,6 +544,7 @@ export default function DashboardPage() {
                 ))}
               </ul>
             </div>
+          </div>
           )}
         </div>
       </section>
@@ -588,8 +636,8 @@ export default function DashboardPage() {
                     {CATEGORY_ICONS[act.type] ?? "📦"}
                   </span>
                   <div>
-                    <p className="text-sm font-medium capitalize">
-                      {act.type.replace("_", " ")}
+                    <p className="text-sm font-medium">
+                      {ACTIVITY_OPTIONS.find(o => o.value === act.type)?.label || act.type}
                       {act.outlier && (
                         <span className="ml-2 inline-block rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-700 uppercase">
                           Outlier / Batch Entry
@@ -614,6 +662,31 @@ export default function DashboardPage() {
             ))
           )}
         </div>
+      </section>
+
+      {/* ---------- Admin Tools ---------- */}
+      <section aria-label="Developer tools" className="pt-8 border-t border-[var(--border)] mt-8 flex justify-center gap-6 text-sm">
+        <button
+          data-testid="load-sample-data"
+          onClick={async () => {
+            const reqs = [
+              { type: 'car', quantity: 25 },
+              { type: 'electricity', quantity: 15 },
+              { type: 'non_veg_meal', quantity: 3 },
+            ];
+            for (const r of reqs) {
+              await fetch('/api/activities', {
+                method: 'POST',
+                body: JSON.stringify(r),
+                headers: { 'Content-Type': 'application/json' },
+              });
+            }
+            fetchStats();
+          }}
+          className="text-[var(--text-muted)] hover:text-emerald-600 font-medium transition-colors"
+        >
+          Load Sample Data
+        </button>
       </section>
     </div>
   );
