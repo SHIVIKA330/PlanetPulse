@@ -2,7 +2,7 @@
 
 **Track**: Track 2 (Code to Career AI Hackathon)  
 **Brief**: B — PlanetPulse (Climate Tech)  
-**Hackathon ID**: `[YOUR_HACKATHON_ID]`
+**Hackathon ID**: `AZIS-CRK5J4`
 
 > A carbon footprint tracker that turns daily choices into a visible carbon footprint. Built for the Azisly Code2Career AI Hackathon.
 
