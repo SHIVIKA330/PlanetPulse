@@ -1,36 +1,102 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🌿 PlanetPulse — Carbon Footprint Tracker
 
-## Getting Started
+**Track**: Track 2 (Code to Career AI Hackathon)  
+**Brief**: B — PlanetPulse (Climate Tech)  
+**Hackathon ID**: `[YOUR_HACKATHON_ID]`
 
-First, run the development server:
+> A carbon footprint tracker that turns daily choices into a visible carbon footprint. Built for the Azisly Code2Career AI Hackathon.
+
+## 🚀 Live Demo
+
+🔗 **[planetpulse.vercel.app](https://planetpulse.vercel.app)** *(update after deployment)*
+
+## 🏗️ Tech Stack
+
+- **Framework**: Next.js 15 (App Router)
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS v4
+- **Charts**: Recharts
+- **Deployment**: Vercel
+
+## 📦 Getting Started
+
+### Prerequisites
+- Node.js 18+ 
+- npm 9+
+
+### Installation
 
 ```bash
+git clone https://github.com/YOUR_USERNAME/planetpulse.git
+cd planetpulse
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Test Credentials
+No authentication required — all features are accessible without login.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## ✅ Features Implemented
 
-## Learn More
+### 1. Log an Activity
+Record an activity with type (car, bus, flight, electricity, veg meal, non-veg meal) and quantity.
 
-To learn more about Next.js, take a look at the following resources:
+### 2. CO₂ Calculation
+Fixed emission factors as specified:
+| Activity | Factor | Unit |
+|----------|--------|------|
+| Car | 0.20 kg/km | km |
+| Bus | 0.08 kg/km | km |
+| Flight | 0.25 kg/km | km |
+| Electricity | 0.80 kg/kWh | kWh |
+| Veg Meal | 0.50 kg/meal | meals |
+| Non-Veg Meal | 2.00 kg/meal | meals |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 3. Dashboard
+Total footprint plus per-category breakdown with interactive donut chart.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 4. Weekly Target
+Set a weekly CO₂ target; the app shows progress via a visual gauge and flags when exceeded.
 
-## Deploy on Vercel
+### 5. History & Filter
+All logged activities, filterable by type and date range.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🔌 Standard API
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This project implements the standard REST API:
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/activities` | GET | List activities (query: type, start_date, end_date) |
+| `/api/activities` | POST | Create activity `{ type, quantity }` |
+| `/api/activities/:id` | GET | Get single activity |
+| `/api/activities/:id` | DELETE | Delete activity |
+| `/api/stats` | GET | Dashboard stats |
+| `/api/target` | GET | Get weekly target |
+| `/api/target` | PUT | Set weekly target `{ target_kg }` |
+
+## 📁 Project Structure
+
+```
+src/
+├── app/
+│   ├── api/
+│   │   ├── activities/
+│   │   │   ├── route.ts       # GET/POST activities
+│   │   │   └── [id]/route.ts  # GET/DELETE single activity
+│   │   ├── stats/route.ts     # Dashboard statistics
+│   │   └── target/route.ts    # Weekly target GET/PUT
+│   ├── log/page.tsx           # Log activity page
+│   ├── history/page.tsx       # History & filter page
+│   ├── layout.tsx             # Root layout with navigation
+│   ├── page.tsx               # Dashboard page
+│   └── globals.css            # Global styles
+└── lib/
+    └── store.ts               # In-memory data store & CO₂ engine
+```
+
+## 📄 License
+
+MIT
