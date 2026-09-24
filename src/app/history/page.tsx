@@ -131,7 +131,7 @@ export default function HistoryPage() {
       {/* ---------- Filter Bar ---------- */}
       <section
         aria-label="Filters"
-        className="rounded-2xl bg-white p-4 shadow-sm border border-[var(--border)] space-y-4"
+        className="rounded-2xl bg-[var(--surface)] p-4 shadow-sm border border-[var(--border)] space-y-4"
       >
         {/* Category pills */}
         <div>
@@ -222,7 +222,7 @@ export default function HistoryPage() {
           </div>
         ) : !Array.isArray(activities) || activities.length === 0 ? (
           /* -- Empty state -- */
-          <div className="rounded-2xl bg-white border border-[var(--border)] flex flex-col items-center justify-center py-16 px-4 text-center">
+          <div className="rounded-2xl bg-[var(--surface)] border border-[var(--border)] flex flex-col items-center justify-center py-16 px-4 text-center">
             <span className="text-5xl mb-4" aria-hidden="true">
               🍃
             </span>
@@ -240,7 +240,7 @@ export default function HistoryPage() {
             {activities.map((act) => (
               <div
                 key={act.id}
-                className="rounded-2xl bg-white border border-[var(--border)] shadow-sm p-4 flex items-center justify-between gap-4 hover:shadow-md transition-shadow"
+                className="rounded-2xl bg-[var(--surface)] border border-[var(--border)] shadow-sm p-4 flex items-center justify-between gap-4 hover:shadow-md transition-shadow"
               >
                 {/* Left: icon + info */}
                 <div className="flex items-center gap-3 min-w-0">

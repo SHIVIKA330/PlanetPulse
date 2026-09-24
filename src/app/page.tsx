@@ -107,7 +107,7 @@ function StatCard({
         : "bg-[var(--bg-cream)] text-[var(--text-main)]"
     }`}>
       {/* Decorative top-left icon circle for flavor */}
-      <div className={`absolute -top-4 -left-4 w-20 h-20 rounded-full opacity-20 pointer-events-none ${isForest ? "bg-white" : "bg-[var(--lime)]"}`} />
+      <div className={`absolute -top-4 -left-4 w-20 h-20 rounded-full opacity-20 pointer-events-none ${isForest ? "bg-[var(--surface)]" : "bg-[var(--lime)]"}`} />
       
       <span className={`text-sm font-bold uppercase tracking-wider relative z-10 ${
         isForest ? "text-white/80" : "text-[var(--text-muted)]"
@@ -424,7 +424,7 @@ export default function DashboardPage() {
                     step="any"
                     value={targetDraft}
                     onChange={(e) => setTargetDraft(e.target.value)}
-                    className="w-24 rounded-xl border border-[var(--border-soft)] bg-white px-3 py-2 text-lg font-bold text-[var(--forest-dark)] focus:outline-none focus:ring-2 focus:ring-[var(--lime)]"
+                    className="w-24 rounded-xl border border-[var(--border-soft)] bg-[var(--surface)] px-3 py-2 text-lg font-bold text-[var(--forest-dark)] focus:outline-none focus:ring-2 focus:ring-[var(--lime)]"
                     aria-label="Weekly target in kg CO₂e"
                   />
                   <span className="text-sm font-medium text-[var(--text-muted)]">kg</span>
@@ -442,7 +442,7 @@ export default function DashboardPage() {
                       setEditingTarget(false);
                       setTargetDraft(String(stats.weeklyTarget));
                     }}
-                    className="flex-1 rounded-full bg-white px-3 py-1.5 text-sm font-bold text-[var(--text-muted)] hover:text-[var(--forest)] hover:bg-gray-50 border border-[var(--border-soft)] transition-colors"
+                    className="flex-1 rounded-full bg-[var(--surface)] px-3 py-1.5 text-sm font-bold text-[var(--text-muted)] hover:text-[var(--forest)] hover:bg-gray-50 border border-[var(--border-soft)] transition-colors"
                   >
                     Cancel
                   </button>
@@ -457,7 +457,7 @@ export default function DashboardPage() {
                   <span className="text-sm font-medium text-[var(--text-muted)]">kg CO₂e</span>
                   <button
                     onClick={() => setEditingTarget(true)}
-                    className="rounded-full bg-white border border-[var(--border-soft)] px-4 py-1.5 text-sm font-bold text-[var(--forest)] hover:bg-[var(--lime)] hover:text-white hover:border-[var(--lime)] transition-colors shadow-sm"
+                    className="rounded-full bg-[var(--surface)] border border-[var(--border-soft)] px-4 py-1.5 text-sm font-bold text-[var(--forest)] hover:bg-[var(--lime)] hover:text-white hover:border-[var(--lime)] transition-colors shadow-sm"
                   >
                     ✏️ Edit
                   </button>
@@ -488,7 +488,7 @@ export default function DashboardPage() {
         <h2 className="text-lg font-bold text-[var(--forest-dark)] mb-4 px-2 tracking-tight">
           CO₂ by Category
         </h2>
-        <div className="rounded-[32px] bg-white p-8 shadow-sm border border-[var(--border-soft)]">
+        <div className="rounded-[32px] bg-[var(--surface)] p-8 shadow-sm border border-[var(--border-soft)]">
           {stats.categoryBreakdown.length === 0 ? (
             <p className="text-center text-[var(--text-muted)] py-8">
               No activities logged this week. Start by recording your first activity.
@@ -528,8 +528,8 @@ export default function DashboardPage() {
 
               <div className="w-full md:w-2/3 flex flex-col gap-4">
                 {stats.largestContributor && stats.weeklyCo2 > 0 && (
-                  <div className="rounded-2xl bg-[#E8F3E5] border border-[#C5DFB3] p-5">
-                    <p className="text-sm text-[var(--forest-dark)]">
+                  <div className="rounded-2xl bg-[var(--insight-bg)] border border-[var(--insight-border)] p-5">
+                    <p className="text-sm text-[var(--insight-text)]">
                       <span className="font-black text-lg block mb-1">💡 Insight</span>
                       {stats.largestContributor} is{" "}
                       <strong>{Math.round((stats.categoryBreakdown[0].totalCo2 / stats.weeklyCo2) * 100)}%</strong> of your footprint this week.
@@ -587,7 +587,7 @@ export default function DashboardPage() {
               id="ql-type"
               value={qlType}
               onChange={(e) => setQlType(e.target.value)}
-              className="w-full rounded-full border border-[var(--border-soft)] bg-white px-5 py-3 text-[15px] font-medium focus:outline-none focus:ring-2 focus:ring-[var(--lime)] shadow-sm"
+              className="w-full rounded-full border border-[var(--border-soft)] bg-[var(--surface)] px-5 py-3 text-[15px] font-medium focus:outline-none focus:ring-2 focus:ring-[var(--lime)] shadow-sm"
             >
               {ACTIVITY_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -613,7 +613,7 @@ export default function DashboardPage() {
               value={qlQty}
               onChange={(e) => setQlQty(e.target.value)}
               placeholder="e.g. 15"
-              className="w-full rounded-full border border-[var(--border-soft)] bg-white px-5 py-3 text-[15px] font-medium focus:outline-none focus:ring-2 focus:ring-[var(--lime)] shadow-sm"
+              className="w-full rounded-full border border-[var(--border-soft)] bg-[var(--surface)] px-5 py-3 text-[15px] font-medium focus:outline-none focus:ring-2 focus:ring-[var(--lime)] shadow-sm"
             />
           </div>
 
@@ -638,7 +638,7 @@ export default function DashboardPage() {
         <h2 className="text-lg font-bold text-[var(--forest-dark)] mb-4 px-2 tracking-tight">
           Recent Activity
         </h2>
-        <div className="rounded-[32px] bg-white shadow-sm border border-[var(--border-soft)] divide-y divide-[var(--border-soft)] overflow-hidden">
+        <div className="rounded-[32px] bg-[var(--surface)] shadow-sm border border-[var(--border-soft)] divide-y divide-[var(--border-soft)] overflow-hidden">
           {stats.recentActivities.length === 0 ? (
             <p className="text-center text-[var(--text-muted)] py-8 font-medium">
               No activities yet — use Quick Log above or visit the Log page!

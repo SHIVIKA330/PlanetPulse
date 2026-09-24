@@ -127,19 +127,19 @@ export default function LogPage() {
                     setSelected(act.value);
                     setShowAbsurdConfirm(false);
                   }}
-                  className={`flex flex-col items-center gap-1.5 rounded-2xl border-2 p-4 transition-all
+                  className={`flex flex-col items-center gap-2 rounded-[24px] border-2 p-5 transition-all
                     ${
                       isActive
-                        ? "border-emerald-600 bg-emerald-50 shadow-sm"
-                        : "border-[var(--border)] bg-white hover:border-emerald-300 hover:bg-emerald-50/40"
+                        ? "border-[var(--lime)] bg-[var(--insight-bg)] shadow-sm scale-105"
+                        : "border-[var(--border-soft)] bg-[var(--surface)] hover:border-[var(--lime)] hover:bg-[var(--bg-cream)]"
                     }`}
                   aria-pressed={isActive}
                 >
                   <span className="text-3xl">{act.icon}</span>
                   <span
-                    className={`text-sm font-medium ${
+                    className={`text-sm font-bold tracking-tight ${
                       isActive
-                        ? "text-emerald-800"
+                        ? "text-[var(--insight-text)]"
                         : "text-[var(--text-muted)]"
                     }`}
                   >
@@ -155,7 +155,7 @@ export default function LogPage() {
         <div>
           <label
             htmlFor="quantity"
-            className="block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-2"
+            className="block text-xs font-bold uppercase tracking-wider text-[var(--forest-dark)] mb-2"
           >
             {activity.value === 'car' || activity.value === 'bus' || activity.value === 'flight' 
               ? 'Quantity (km)' 
@@ -177,9 +177,9 @@ export default function LogPage() {
                 setShowAbsurdConfirm(false);
               }}
               placeholder={`Enter ${activity.unit}`}
-              className="flex-1 rounded-xl border border-[var(--border)] px-4 py-3 text-lg focus:outline-none focus:ring-2 focus:ring-emerald-400 transition-shadow"
+              className="flex-1 rounded-full border border-[var(--border-soft)] bg-[var(--surface)] px-5 py-4 text-lg focus:outline-none focus:ring-2 focus:ring-[var(--lime)] transition-shadow shadow-sm"
             />
-            <span className="text-sm text-[var(--text-muted)] font-medium min-w-[3rem]">
+            <span className="text-sm font-bold text-[var(--text-muted)] uppercase tracking-widest min-w-[3rem]">
               {activity.unit}
             </span>
           </div>
@@ -187,23 +187,23 @@ export default function LogPage() {
 
         {/* ---------- Live CO₂ Preview ---------- */}
         {qty > 0 && (
-          <div className="rounded-xl bg-emerald-50 border border-emerald-200 p-4 flex items-center justify-between" data-testid="live-preview">
-            <span className="text-sm font-medium text-emerald-800">
+          <div className="rounded-[24px] bg-[var(--insight-bg)] border border-[var(--insight-border)] p-5 flex items-center justify-between shadow-sm" data-testid="live-preview">
+            <span className="text-sm font-bold text-[var(--insight-text)]">
               Estimated CO₂
             </span>
-            <span className="text-2xl font-bold text-emerald-700">
+            <span className="text-2xl font-black text-[var(--insight-text)]">
               {previewCo2 >= 1000
                 ? `${(previewCo2 / 1000).toFixed(2)} t`
                 : `${previewCo2.toFixed(2)} kg`}{" "}
-              <span className="text-sm font-normal">CO₂e</span>
+              <span className="text-sm font-bold">CO₂e</span>
             </span>
           </div>
         )}
 
         {/* ---------- DP2 — Absurd Input Confirmation ---------- */}
         {showAbsurdConfirm && (
-          <div className="rounded-xl bg-amber-50 border border-amber-300 p-4 space-y-3" data-testid="absurd-warning">
-            <p className="text-amber-800 font-semibold">
+          <div className="rounded-[24px] bg-[var(--warning)]/10 border border-[var(--warning)]/30 p-5 space-y-3" data-testid="absurd-warning">
+            <p className="text-[var(--warning)] font-bold">
               ⚠️ {
                 (selected === "car" || selected === "bus") && qty >= 500000
                   ? "500,000 km is over 12× around the Earth. Did you mean 500?"
@@ -216,7 +216,7 @@ export default function LogPage() {
                   : "That quantity appears unusually high."
               }
             </p>
-            <p className="text-sm text-amber-700">
+            <p className="text-sm text-[var(--text-main)] opacity-80 font-medium">
               Please check the value before logging this activity. Is <strong>{qty}</strong> {activity.unit} correct?
             </p>
             <div className="flex gap-3">
@@ -225,14 +225,14 @@ export default function LogPage() {
                 data-testid="confirm-absurd"
                 onClick={() => doSubmit(true)}
                 disabled={submitting}
-                className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700 disabled:opacity-50 transition-colors"
+                className="rounded-full bg-[var(--warning)] px-5 py-2.5 text-sm font-bold text-white hover:opacity-90 disabled:opacity-50 transition-colors shadow-sm"
               >
                 {submitting ? "Logging…" : "Yes, log it anyway"}
               </button>
               <button
                 type="button"
                 onClick={() => setShowAbsurdConfirm(false)}
-                className="rounded-lg border border-amber-300 px-4 py-2 text-sm font-medium text-amber-800 hover:bg-amber-100 transition-colors"
+                className="rounded-full border border-[var(--warning)] px-5 py-2.5 text-sm font-bold text-[var(--warning)] hover:bg-[var(--warning)]/10 transition-colors"
               >
                 Edit value
               </button>
@@ -246,7 +246,7 @@ export default function LogPage() {
             type="submit"
             data-testid="submit-activity"
             disabled={submitting || qty <= 0}
-            className="w-full rounded-xl bg-emerald-600 py-3 text-base font-semibold text-white hover:bg-emerald-700 disabled:opacity-40 transition-colors"
+            className="w-full rounded-full bg-[var(--lime)] py-4 text-[15px] font-bold text-white hover:bg-[var(--lime-hover)] disabled:opacity-40 transition-colors shadow-sm"
           >
             {submitting ? "Logging…" : "Log Activity"}
           </button>
@@ -254,15 +254,15 @@ export default function LogPage() {
 
         {/* ---------- Error ---------- */}
         {error && (
-          <p className="text-sm text-red-600 font-medium text-center">
+          <p className="text-sm text-[var(--danger)] font-bold text-center">
             {error}
           </p>
         )}
 
         {/* ---------- Success Toast ---------- */}
         {success && (
-          <div className="rounded-xl bg-emerald-50 border border-emerald-300 p-4 text-center space-y-2">
-            <p className="text-emerald-800 font-semibold">
+          <div className="rounded-[24px] bg-[var(--insight-bg)] border border-[var(--insight-border)] p-5 text-center space-y-2 shadow-sm">
+            <p className="text-[var(--insight-text)] font-bold">
               ✅ Activity logged successfully!
             </p>
             <button
@@ -271,7 +271,7 @@ export default function LogPage() {
                 setSuccess(false);
                 setQuantity("");
               }}
-              className="text-sm font-medium text-emerald-600 hover:text-emerald-800 underline"
+              className="text-sm font-bold text-[var(--forest)] hover:text-[var(--lime)] underline"
             >
               Log another activity
             </button>

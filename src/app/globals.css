@@ -3,6 +3,7 @@
 :root {
   --bg-page: #FFFFFF;
   --bg-cream: #F4F3EB;
+  --surface: #FFFFFF;
   --forest: #385A38;
   --forest-dark: #2A452A;
   --lime: #95B941;
@@ -10,8 +11,28 @@
   --text-main: #2C3A2C;
   --text-muted: #687668;
   --border-soft: #E2E0D1;
+  --insight-bg: #E8F3E5;
+  --insight-border: #C5DFB3;
+  
   --danger: #EF4444;
   --warning: #F59E0B;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-page: #0C120C;
+    --bg-cream: #141C14;
+    --surface: #101610;
+    --forest: #588A58;
+    --forest-dark: #192619;
+    --lime: #A2C947;
+    --lime-hover: #B4E34F;
+    --text-main: #E4E8E4;
+    --text-muted: #919E91;
+    --border-soft: #253325;
+    --insight-bg: #152615;
+    --insight-border: #2B452B;
+  }
 }
 
 body {
