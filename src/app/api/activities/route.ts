@@ -29,13 +29,14 @@ export async function GET(request: NextRequest) {
 
     const typeParam = searchParams.get('type');
     if (typeParam) {
-      if (!EMISSION_FACTORS[typeParam as Activity['type']]) {
+      const normalizedType = typeParam.toLowerCase().replace(/-/g, '_');
+      if (normalizedType !== 'all' && !EMISSION_FACTORS[normalizedType as Activity['type']]) {
         return NextResponse.json(
           { error: `Invalid activity type: "${typeParam}". Must be one of: ${Object.keys(EMISSION_FACTORS).join(', ')}` },
           { status: 400, headers: CORS_HEADERS },
         );
       }
-      filters.type = typeParam as Activity['type'];
+      filters.type = normalizedType as Activity['type'];
     }
 
     const startDate = searchParams.get('start_date');

@@ -150,7 +150,11 @@ export function getActivities(filters?: ActivityFilters): Activity[] {
   let result = [...activities];
 
   if (filters?.type) {
-    result = result.filter((a) => a.type === filters.type);
+    const selectedCategory = filters.type.toLowerCase().replace(/-/g, '_');
+    result = result.filter((a) => {
+      const typeStr = (a.type || '').toLowerCase().replace(/-/g, '_');
+      return selectedCategory === 'all' || typeStr === selectedCategory;
+    });
   }
 
   if (filters?.start_date) {

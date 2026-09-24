@@ -69,7 +69,12 @@ export default function HistoryPage() {
       const res = await fetch(`/api/activities${qs ? `?${qs}` : ""}`);
       if (!res.ok) throw new Error("Failed to load activities");
       const data = await res.json();
-      const mappedData: Activity[] = data.map((a: any) => ({
+      
+      const activitiesArray = Array.isArray(data?.activities) 
+        ? data.activities 
+        : Array.isArray(data) ? data : [];
+
+      const mappedData: Activity[] = activitiesArray.map((a: any) => ({
         id: a.id,
         type: a.type,
         quantity: a.quantity,
@@ -215,7 +220,7 @@ export default function HistoryPage() {
               Retry
             </button>
           </div>
-        ) : activities.length === 0 ? (
+        ) : !Array.isArray(activities) || activities.length === 0 ? (
           /* -- Empty state -- */
           <div className="rounded-2xl bg-white border border-[var(--border)] flex flex-col items-center justify-center py-16 px-4 text-center">
             <span className="text-5xl mb-4" aria-hidden="true">
