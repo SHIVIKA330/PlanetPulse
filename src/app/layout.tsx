@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { NavBar } from "@/components/NavBar";
+import { AIBotAssistant } from "@/components/AIBotAssistant";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,6 +35,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <main className="flex-1 max-w-6xl mx-auto w-full px-4 sm:px-6 py-8">
             {children}
           </main>
+
+          <AIBotAssistant />
 
           <footer className="border-t border-[var(--border-soft)] mt-auto">
             <div className="max-w-6xl mx-auto px-6 py-10 grid grid-cols-1 md:grid-cols-3 gap-8">
